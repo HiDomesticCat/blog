@@ -37,5 +37,6 @@ jobs:
         with:
           publish_dir: ./public
           publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           # GITHUB_TOKEN is automatically provided by Actions; no need to set manually
           # If you prefer to use main branch /docs folder, change publish_branch and publish_dir accordingly
