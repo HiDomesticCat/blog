@@ -44,6 +44,10 @@ cd /root/workspace/blog
 3) 本機啟動開發伺服器
 ```
 hugo server --bind 0.0.0.0 --port 1313
+
+rm -rf docs && hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/" && mkdir -p docs && cp -r public/* docs/ || true && git add -A docs && git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit" && git push --force origin main
+
+hugo server --bind 0.0.0.0 --port 1313 --baseURL http://192.168.10.13:1313
 ```
 - 於瀏覽器開啟：http://localhost:1313/
 - 預設語言路徑：/zh/（繁體中文）、/en/（English）

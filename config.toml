@@ -1,5 +1,5 @@
-baseURL = "http://localhost:1313/"
-title = "我的研究筆記"
+baseURL = "https://hidomesticcat.github.io/blog/"
+title = "hicat0x0 blog"
 theme = "hugo-coder"
 languageCode = "zh-Hant"
 defaultContentLanguage = "zh"
@@ -110,7 +110,7 @@ pagerSize = 10
     [[languages.zh.menu.main]]
       name = "首頁"
       weight = 1
-      url = "/"
+      url = "zh/"
 
     [[languages.zh.menu.main]]
       name = "文章"
@@ -144,7 +144,7 @@ pagerSize = 10
 
   [languages.en]
     languageName = "English"
-    title = "My Research Notes"
+    title = "hicat0x0"
     weight = 2
     contentDir = "content/en"
 
@@ -157,7 +157,7 @@ pagerSize = 10
     [[languages.en.menu.main]]
       name = "Home"
       weight = 1
-      url = "/"
+      url = "en/"
 
     [[languages.en.menu.main]]
       name = "Posts"
