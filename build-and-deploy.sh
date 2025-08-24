@@ -22,7 +22,7 @@ fi
 
 # Step 3: Build Hugo site
 echo "🔨 Building Hugo site..."
-hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/"
+hugo --minify --baseURL "https://blog.hicat0x0.uk/"
 
 # Step 4: Create docs directory and copy files
 echo "📁 Creating docs directory and copying files..."
