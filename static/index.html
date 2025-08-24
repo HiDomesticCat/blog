@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting…</title>
+  <meta http-equiv="refresh" content="0; url=/zh/">
+  <link rel="canonical" href="/zh/">
+  <meta name="robots" content="noindex">
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 2rem; }
+    a { color: #2563eb; }
+  </style>
+  <script>
+    (function() {
+      var target = '/zh/';
+      // Preserve path if someone lands on a subpath without lang prefix, e.g., /posts -> /zh/posts
+      try {
+        var loc = window.location;
+        var path = loc.pathname;
+        if (!path.startsWith('/zh/') && !path.startsWith('/en/')) {
+          // Normalize multiple slashes
+          path = path.replace(/\/+/g, '/');
+          if (path === '/' || path === '') {
+            window.location.replace(target + (loc.search || '') + (loc.hash || ''));
+          } else {
+            window.location.replace('/zh' + path + (loc.search || '') + (loc.hash || ''));
+          }
+        }
+      } catch (e) {
+        // fallback to meta refresh
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to <a href="/zh/">/zh/</a>…</p>
+  <noscript>
+    <p>如果沒有自動跳轉，請點擊 <a href="/zh/">這裡</a> 前往繁中首頁。</p>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{{ define "title" }}
+  404 Page not found · {{ .Site.Title }}
+{{ end }}
+
+{{ define "content" }}
+  <div class="container">
+    <div id="fallback-content">
+      <h1>404</h1>
+      <p>{{ i18n "page_does_not_exist" }}</p>
+      <p>正在檢查其他語言版本...</p>
+    </div>
+  </div>
+
+  <script>
+    // Get current URL path
+    const currentPath = window.location.pathname;
+    
+    // Determine current and other language
+    let currentLang = 'zh';
+    let otherLang = 'en';
+    
+    if (currentPath.startsWith('/en/')) {
+      currentLang = 'en';
+      otherLang = 'zh';
+    }
+    
+    // Create the alternative language URL
+    let altPath = currentPath;
+    
+    if (currentLang === 'zh') {
+      // If current is Chinese, try English
+      if (currentPath === '/' || currentPath === '/zh/') {
+        altPath = '/en/';
+      } else if (currentPath.startsWith('/zh/')) {
+        altPath = currentPath.replace('/zh/', '/en/');
+      } else {
+        // Root level path, prepend /en/
+        altPath = '/en' + currentPath;
+      }
+    } else {
+      // If current is English, try Chinese
+      altPath = currentPath.replace('/en/', '/zh/');
+    }
+    
+    // Check if the alternative language page exists
+    fetch(altPath, { method: 'HEAD' })
+      .then(response => {
+        if (response.ok) {
+          // Page exists in other language, redirect
+          window.location.href = altPath;
+        } else {
+          // Page doesn't exist in other language either
+          document.getElementById('fallback-content').innerHTML = `
+            <h1>404</h1>
+            <p>{{ i18n "page_does_not_exist" }}</p>
+            <p>{{ i18n "head_back" .Site.BaseURL | safeHTML }}</p>
+          `;
+        }
+      })
+      .catch(error => {
+        // Error checking, show default 404
+        document.getElementById('fallback-content').innerHTML = `
+          <h1>404</h1>
+          <p>{{ i18n "page_does_not_exist" }}</p>
+          <p>{{ i18n "head_back" .Site.BaseURL | safeHTML }}</p>
+        `;
+      });
+  </script>
+{{ end }}
