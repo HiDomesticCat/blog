@@ -49,6 +49,7 @@ rm -rf docs public && hugo --minify --baseURL "https://HiDomesticCat.github.io/b
 mkdir -p docs && cp -r public/* docs/ || true
 git add .
 git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit"
+git push origin main
 git push --force origin main
 
 hugo server --bind 0.0.0.0 --port 1313 --baseURL http://192.168.10.13:1313
