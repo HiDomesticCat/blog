@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 baseURL = "http://localhost:1313"
 title = "hicat0x0 blog"
-=======
-baseURL = "https://HiDomesticCat.github.io/blog/"
-title = "我的研究筆記"
->>>>>>> 4cbd9be67009f72ad924b3547b2f50e8e072f533
 theme = "hugo-coder"
 languageCode = "zh-Hant"
 defaultContentLanguage = "zh"
