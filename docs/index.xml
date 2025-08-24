@@ -2,59 +2,59 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>我的研究筆記</title>
-    <link>http://localhost:1313/</link>
+    <link>https://HiDomesticCat.github.io/blog/</link>
     <description>Recent content on 我的研究筆記</description>
     <generator>Hugo</generator>
     <language>zh</language>
     <lastBuildDate>Sat, 20 Jan 2024 10:00:00 +0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://HiDomesticCat.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>人工智慧的未來發展趨勢</title>
-      <link>http://localhost:1313/zh/posts/ai-future/</link>
+      <link>https://HiDomesticCat.github.io/blog/zh/posts/ai-future/</link>
       <pubDate>Sat, 20 Jan 2024 10:00:00 +0800</pubDate>
-      <guid>http://localhost:1313/zh/posts/ai-future/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/zh/posts/ai-future/</guid>
       <description>引言 Link to heading 人工智慧（AI）正在快速改變我們的世界。從自動駕駛汽車到智能助理，AI技術已經深入我們生活的方方面面。&#xA;當前AI技術的主要應用領域 Link to heading 1. 自然語言處理 Link to heading ChatGPT和其他大型語言模型 機器翻譯 語音識別 2. 計算機視覺 Link to heading 圖像識別 醫療影像分析 自動駕駛 3. 推薦系統 Link to heading 個性化內容推薦 電子商務 社交媒體 未來發展趨勢 Link to heading 通用人工智慧（AGI） Link to heading 科學家們正在努力開發能夠像人類一樣思考和學習的通用人工智慧。&#xA;AI倫理和監管 Link to heading 隨著AI技術的發展，相關的倫理問題和監管框架也變得越來越重要。&#xA;量子計算與AI Link to heading 量子計算的發展可能會為AI帶來革命性的突破。&#xA;結論 Link to heading 人工智慧的未來充滿無限可能，但同時也需要我們謹慎對待其發展帶來的挑戰。</description>
     </item>
     <item>
       <title>About Me</title>
-      <link>http://localhost:1313/en/about/</link>
+      <link>https://HiDomesticCat.github.io/blog/en/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/en/about/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/en/about/</guid>
       <description>Welcome to My Research Notes Link to heading I am a researcher passionate about exploring cutting-edge technologies, focusing on the following areas:&#xA;🔐 Information Security Link to heading In-depth research on network security, cryptography, and system protection technologies, committed to building a more secure digital environment.&#xA;📡 Wireless Communications Link to heading Exploring 5G/6G technologies, IoT communication protocols, and wireless network optimization solutions.&#xA;💻 Quantum Computing Link to heading Researching quantum algorithms, quantum cryptography, and their potential in practical applications.</description>
     </item>
     <item>
       <title>Contact Me</title>
-      <link>http://localhost:1313/en/contact/</link>
+      <link>https://HiDomesticCat.github.io/blog/en/contact/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/en/contact/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/en/contact/</guid>
       <description>Get in Touch Link to heading Thank you for your interest in my research work! Whether you want to discuss technical issues, collaboration opportunities, or simply exchange ideas, I welcome your message.&#xA;📧 Email Link to heading This is the best way to reach me:&#xA;your-email@example.com&#xA;I typically respond within 24-48 hours.&#xA;🌐 Social Media Link to heading You can also find me on these platforms:&#xA;GitHub: @your-username&#xA;Check out my open source projects and code contributions</description>
     </item>
     <item>
       <title>Projects</title>
-      <link>http://localhost:1313/en/projects/</link>
+      <link>https://HiDomesticCat.github.io/blog/en/projects/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/en/projects/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/en/projects/</guid>
       <description>My Open Source Projects Link to heading Here are some open source projects I&amp;rsquo;m developing and maintaining. Contributions are welcome!&#xA;🔐 SecureVault Link to heading High-Performance Encrypted Storage Solution&#xA;A secure file storage system built with Rust, supporting multiple encryption algorithms and cloud synchronization.&#xA;Tech Stack: Rust, AES-256, RSA, WebAssembly Features: Zero-knowledge architecture, end-to-end encryption, cross-platform support Status: 🟢 Actively maintained GitHub | Documentation 📡 5G-NetSim Link to heading 5G Network Simulator</description>
     </item>
     <item>
       <title>關於我</title>
-      <link>http://localhost:1313/zh/about/</link>
+      <link>https://HiDomesticCat.github.io/blog/zh/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/zh/about/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/zh/about/</guid>
       <description>歡迎來到我的研究筆記 Link to heading 我是一位熱衷於探索前沿科技的研究者，專注於以下領域：&#xA;🔐 資訊安全 Link to heading 深入研究網路安全、密碼學和系統防護技術，致力於構建更安全的數位環境。&#xA;📡 無線通訊 Link to heading 探索5G/6G技術、物聯網通訊協議和無線網路優化方案。&#xA;💻 量子電腦 Link to heading 研究量子演算法、量子密碼學及其在實際應用中的潛力。&#xA;☁️ 雲端技術 Link to heading 專注於雲端架構設計、容器化技術和分散式系統的最佳實踐。&#xA;為什麼寫這個部落格？ Link to heading 在這個資訊爆炸的時代，我相信知識分享的力量。這個部落格是我的數位筆記本，記錄著：&#xA;📚 技術學習心得 🔬 研究發現與見解 💡 創新想法與實驗 🛠️ 實用工具與技巧 聯絡方式 Link to heading 如果您對我的研究感興趣，或想要交流技術心得，歡迎透過以下方式聯絡我：&#xA;📧 Email: your-email@example.com 💬 GitHub: @your-username 「知識就是力量，分享讓力量倍增。」&#xA;感謝您的造訪，希望我的筆記能為您帶來啟發！</description>
     </item>
     <item>
       <title>聯絡我</title>
-      <link>http://localhost:1313/zh/contact/</link>
+      <link>https://HiDomesticCat.github.io/blog/zh/contact/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/zh/contact/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/zh/contact/</guid>
       <description>與我聯繫 Link to heading 感謝您對我的研究工作感興趣！無論您是想討論技術問題、合作機會，還是單純想交流想法，我都非常歡迎您的來信。&#xA;📧 電子郵件 Link to heading 這是聯繫我的最佳方式：&#xA;your-email@example.com&#xA;我通常會在 24-48 小時內回覆。&#xA;🌐 社交媒體 Link to heading 您也可以通過以下平台找到我：&#xA;GitHub: @your-username&#xA;查看我的開源項目和程式碼貢獻&#xA;LinkedIn: 您的名字&#xA;了解我的專業背景和工作經歷&#xA;Twitter: @your-username&#xA;關注我的技術分享和想法&#xA;💬 合作機會 Link to heading 我對以下類型的合作特別感興趣：&#xA;技術諮詢：資訊安全、雲端架構、系統設計 研究合作：量子計算、5G/6G 通訊、新興技術 演講邀約：技術分享、工作坊、研討會 寫作機會：技術文章、專欄撰寫 📍 時區 Link to heading 我目前位於 UTC+8 時區，工作時間通常是週一至週五的 9:00-18:00。&#xA;🔐 安全通訊 Link to heading 如果您需要發送敏感資訊，請使用我的 PGP 公鑰：&#xA;-----BEGIN PGP PUBLIC KEY BLOCK----- [您的 PGP 公鑰] -----END PGP PUBLIC KEY BLOCK----- 📋 聯絡表單 Link to heading 您也可以使用下方表單直接發送訊息：</description>
     </item>
     <item>
       <title>專案作品</title>
-      <link>http://localhost:1313/zh/projects/</link>
+      <link>https://HiDomesticCat.github.io/blog/zh/projects/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/zh/projects/</guid>
+      <guid>https://HiDomesticCat.github.io/blog/zh/projects/</guid>
       <description>我的開源專案 Link to heading 以下是我正在開發和維護的一些開源專案。歡迎參與貢獻！&#xA;🔐 SecureVault Link to heading 高性能加密儲存解決方案&#xA;一個基於 Rust 開發的安全檔案儲存系統，支援多種加密算法和雲端同步功能。&#xA;技術棧: Rust, AES-256, RSA, WebAssembly 特點: 零知識架構、端到端加密、跨平台支援 狀態: 🟢 活躍開發中 GitHub | 文檔 📡 5G-NetSim Link to heading 5G 網路模擬器&#xA;用於研究和教學的 5G 網路模擬工具，支援各種網路拓撲和協議測試。&#xA;技術棧: Python, NS-3, Docker 特點: 視覺化介面、真實協議模擬、性能分析 狀態: 🟡 維護中 GitHub | Demo 💻 QuantumKit Link to heading 量子計算開發工具包&#xA;簡化量子演算法開發的 Python 函式庫，提供高階 API 和視覺化工具。&#xA;技術棧: Python, Qiskit, NumPy 特點: 直觀 API、量子電路視覺化、演算法模板 狀態: 🟢 活躍開發中 GitHub | PyPI # QuantumKit 使用範例 from quantumkit import Circuit, visualize circuit = Circuit(3) circuit.</description>
     </item>
   </channel>
