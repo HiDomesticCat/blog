@@ -24,7 +24,7 @@ pagerSize = 10
   mainSections = ["posts"]
   # keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
   # info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
-  # avatarURL = "images/avatar.jpg"  # commented to avoid missing file 404
+  avatarURL = "images/hicat0x0.png"  # commented to avoid missing file 404
   dateFormat = "2006年1月2日"
   since = 2025
   colorScheme = "auto"
@@ -102,10 +102,10 @@ pagerSize = 10
     contentDir = "content/zh"
 
     [languages.zh.params]
-      author = "hicat0x0"
-      description = "探索前沿科技，分享研究心得 | 資訊安全 • 無線通訊 • 量子電腦 • 雲端技術"
-      keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
-      info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
+      author = "于京平 (hicat0x0)"
+      description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得 | 資訊安全 • 無線通訊 • 逆向工程 • 雲端原生"
+      keywords = "資訊安全,網路安全,CTF,逆向工程,無線通訊,量子電腦,雲端原生,Kubernetes,DevOps,IoT"
+      info = ["資訊安全","無線通訊","逆向工程","量子計算","雲端原生"]
 
     [[languages.zh.menu.main]]
       name = "首頁"
