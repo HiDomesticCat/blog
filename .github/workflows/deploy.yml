@@ -1,0 +1,41 @@
+name: Build and deploy Hugo site to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.131.0'
+          extended: true
+
+      - name: Install npm (for some themes that use npm in build) (optional)
+        run: |
+          if [ -f package.json ]; then
+            sudo apt-get update
+            sudo apt-get install -y npm
+            npm ci
+          fi
+
+      - name: Build site
+        run: |
+          hugo --minify
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./public
+          publish_branch: gh-pages
+          # GITHUB_TOKEN is automatically provided by Actions; no need to set manually
+          # If you prefer to use main branch /docs folder, change publish_branch and publish_dir accordingly
