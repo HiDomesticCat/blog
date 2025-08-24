@@ -1,4 +1,4 @@
-baseURL = "https://hidomesticcat.github.io/blog/"
+baseURL = "http://localhost:1313"
 title = "hicat0x0 blog"
 theme = "hugo-coder"
 languageCode = "zh-Hant"

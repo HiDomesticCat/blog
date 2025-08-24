@@ -45,7 +45,7 @@ cd /root/workspace/blog
 ```
 hugo server --bind 0.0.0.0 --port 1313
 
-rm -rf docs && hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/" && mkdir -p docs && cp -r public/* docs/ || true && git add -A docs && git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit" && git push --force origin main
+rm -rf docs public && hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/" && mkdir -p docs && cp -r public/* docs/ || true && git add . && git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit" && git push --force origin main
 
 hugo server --bind 0.0.0.0 --port 1313 --baseURL http://192.168.10.13:1313
 ```
