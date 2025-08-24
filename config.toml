@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313/"
+baseURL = "https://HiDomesticCat.github.io/blog/"
 title = "我的研究筆記"
 theme = "hugo-coder"
 languageCode = "zh-Hant"

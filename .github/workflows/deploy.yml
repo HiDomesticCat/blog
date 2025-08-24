@@ -35,7 +35,7 @@ jobs:
 
       - name: Build site
         run: |
-          hugo --minify
+          hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/"
 
       - name: Publish to main:/docs
         env:
