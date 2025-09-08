@@ -73,11 +73,11 @@ pagerSize = 10
 #  weight = 3
 #  url = "https://twitter.com/your-username"
 
-[[params.social]]
-  name = "RSS"
-  icon = "fa-solid fa-rss fa-2x"
-  weight = 4
-  url = "/index.xml"
+#[[params.social]]
+#  name = "RSS"
+#  icon = "fa-solid fa-rss fa-2x"
+#  weight = 4
+#  url = "/index.xml"
 
 [[params.social]]
   name = "Email"
@@ -103,9 +103,9 @@ pagerSize = 10
 
     [languages.zh.params]
       author = "于京平 (hicat0x0)"
-      description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得 | 資訊安全 • 無線通訊 • 逆向工程 • 雲端原生"
-      keywords = "資訊安全,網路安全,CTF,逆向工程,無線通訊,量子電腦,雲端原生,Kubernetes,DevOps,IoT"
-      info = ["資訊安全","無線通訊","逆向工程","量子計算","雲端原生"]
+      description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得 | 資訊安全 • 無線通訊 • 逆向工程 • 雲端系統"
+      keywords = "資訊安全,網路安全,CTF,逆向工程,無線通訊,量子電腦,雲端系統,Kubernetes,DevOps,IoT"
+      info = ["資訊安全","無線通訊","逆向工程","量子計算","雲端系統"]
 
     [[languages.zh.menu.main]]
       name = "首頁"
