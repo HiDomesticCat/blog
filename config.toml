@@ -67,12 +67,6 @@ pagerSize = 10
   weight = 2
   url = "https://www.linkedin.com/in/yu-jing-ping-392940248/"
 
-[[params.social]]
-  name = "LeetCode"
-  icon = "fa-brands fa-leetcode fa-2x"
-  weight = 3
-  url = "https://leetcode.com/u/hiorangecat12888/"
-
 #[[params.social]]
 #  name = "Twitter"
 #  icon = "fa-brands fa-twitter fa-2x"
