@@ -1,0 +1,42 @@
+name: Build and deploy Hugo site
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.145.0'
+          extended: true
+
+      - name: Build site
+        run: hugo --minify --baseURL "https://blog.hicat0x0.uk/"
+
+      - name: Deploy to docs/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -rf docs
+          mkdir -p docs
+          cp -r public/* docs/
+          echo "blog.hicat0x0.uk" > docs/CNAME
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Deploy site to docs [skip ci]"
+            git push
+          fi
