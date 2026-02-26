@@ -1,4 +1,4 @@
-baseURL = "http://localhost:1313"
+baseURL = "https://blog.hicat0x0.uk/"
 title = "hicat0x0 blog"
 theme = "hugo-coder"
 languageCode = "zh-Hant"
@@ -19,12 +19,12 @@ pagerSize = 10
       unsafe = true
 
 [params]
-  # author = "hicat0x0"
-  # description = "探索前沿科技，分享研究心得 | 資訊安全 • 無線通訊 • 量子電腦 • 雲端技術"
+  author = "hicat0x0"
+  description = "探索前沿科技，分享研究心得 | 資訊安全 • 無線通訊 • 量子電腦 • 雲端技術"
   mainSections = ["posts"]
-  # keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
-  # info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
-  avatarURL = "images/hicat0x0.png"  # commented to avoid missing file 404
+  keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
+  info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
+  avatarURL = "images/hicat0x0.png"
   dateFormat = "2006年1月2日"
   since = 2025
   colorScheme = "auto"
@@ -34,8 +34,8 @@ pagerSize = 10
   # 新增功能
   enableToc = true
   enableTocContent = true
-  # customCSS = ["css/custom.css"]
-  # customJS = ["js/custom.js"]
+  customCSS = ["css/custom.css"]
+  customJS = ["js/custom.js"]
   
   # 社交媒體卡片
   # images = ["images/og-image.png"]  # commented to avoid missing file 404
