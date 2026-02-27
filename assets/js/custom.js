@@ -81,8 +81,7 @@
     });
 
     // ===== Dark mode transition animation =====
-    var toggle = document.querySelector('#color-mode-switch') ||
-                 document.querySelector('.color-mode__btn');
+    var toggle = document.getElementById('dark-mode-toggle');
     if (toggle) {
       toggle.addEventListener('click', function () {
         document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';

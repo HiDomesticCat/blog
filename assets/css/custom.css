@@ -219,7 +219,7 @@ body.colorscheme-dark tr:hover td {
 /* ===== Back-to-top button (injected by JS) ===== */
 .back-to-top {
   position: fixed;
-  bottom: 20px;
+  bottom: 80px;
   right: 20px;
   width: 44px;
   height: 44px;
