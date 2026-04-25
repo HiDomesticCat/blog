@@ -287,9 +287,9 @@
  &lt;span class="sr-only">Link to heading&lt;/span>
  &lt;/a>
 &lt;/h3>
-&lt;p>個人技術部落格，使用 Hugo + hugo-coder 主題搭建，部署於 Cloudflare Pages。記錄 CTF 解題、資安研究筆記與技術學習心得。&lt;/p>
+&lt;p>個人技術部落格，使用 Hugo + hugo-coder 主題搭建，部署於 Github Pages。記錄 CTF 解題、資安研究筆記與技術學習心得。&lt;/p>
 &lt;ul>
-&lt;li>&lt;strong>技術&lt;/strong>：Hugo, Markdown, Cloudflare Pages&lt;/li>
+&lt;li>&lt;strong>技術&lt;/strong>：Hugo, Markdown, Github Pages&lt;/li>
 &lt;li>&lt;strong>連結&lt;/strong>：&lt;a href="https://blog.hicat0x0.uk" class="external-link" target="_blank" rel="noopener">blog.hicat0x0.uk&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;hr>
