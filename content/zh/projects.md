@@ -9,9 +9,9 @@ slug = "projects"
 
 ### hicat0x0 Blog
 
-個人技術部落格，使用 Hugo + hugo-coder 主題搭建，部署於 Cloudflare Pages。記錄 CTF 解題、資安研究筆記與技術學習心得。
+個人技術部落格，使用 Hugo + hugo-coder 主題搭建，部署於 Github Pages。記錄 CTF 解題、資安研究筆記與技術學習心得。
 
-- **技術**：Hugo, Markdown, Cloudflare Pages
+- **技術**：Hugo, Markdown, Github Pages
 - **連結**：[blog.hicat0x0.uk](https://blog.hicat0x0.uk)
 
 ---
