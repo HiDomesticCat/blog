@@ -63,5 +63,5 @@ slug = "about"
 
 - **GitHub**：[HiDomesticCat](https://github.com/HiDomesticCat)
 - **Email**：[hicat0x0@hicat0x0.uk](mailto:hicat0x0@hicat0x0.uk)
-- **LinkedIn**：[于京平](https://www.linkedin.com/in/yu-jing-ping-392940248/)
+- **LinkedIn**：[于京平](https://www.linkedin.com/in/jing-ping-yu-392940248/)
 - **開放筆記**：[note.hicat0x0.uk](https://note.hicat0x0.uk)
