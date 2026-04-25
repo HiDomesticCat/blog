@@ -16,7 +16,7 @@ slug = "contact"
 ## 社群帳號
 
 - **GitHub**：[HiDomesticCat](https://github.com/HiDomesticCat)
-- **LinkedIn**：[于京平](https://www.linkedin.com/in/yu-jing-ping-392940248/)
+- **LinkedIn**：[于京平](https://www.linkedin.com/in/jing-ping-yu-392940248/)
 - **LeetCode**：[hicat0x0](https://leetcode.com/u/hicat0x0/)
 
 ---
