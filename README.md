@@ -1,464 +1,321 @@
-# 我的研究筆記（Hugo + hugo-coder）使用與開發教學
+# hicat0x0 blog
 
-本文件說明如何在本機啟動、撰寫內容、維護多語、客製化樣式與部署此部落格。所有相關檔案均位於 /root/workspace/blog 目錄。
+于京平（hicat0x0）的技術部落格原始碼。
+線上網址：**<https://blog.hicat0x0.uk>**
 
-- 架構：Hugo（Extended）+ 主題 hugo-coder
-- 多語：繁中（/zh）為預設語言子路徑、英文（/en）
-- 風格：目前採主題原生風格（未啟用自訂 CSS/JS），確保穩定
-
-目錄大綱：
-- 快速開始
-- 目錄結構
-- 開發模式（本機預覽）
-- 多語設定與首頁顯示（/zh 與 /en 文字不同）
-- 內容撰寫（文章、頁面、分類/標籤）
-  - 圖片（Page Bundle、static/images、figure 短代碼）
-  - 程式碼與語法標示（fenced code、highlight 短代碼、行號/高亮）
-  - 數學公式（KaTeX 啟用與分隔符）
-  - Mermaid 圖表/流程圖
-- 靜態資源與 Hugo 資產管線（assets 與 static）
-- 自訂樣式與腳本（如何啟用/停用）
-- 部署（產生 public/ 並上傳）
-- 清理與版本控制
-- 常見問題（FAQ）
-- 變更紀錄摘要（此次優化項）
-- 範例：一篇完整含圖片/程式碼/公式/流程圖的文章
+| 項目 | 內容 |
+|------|------|
+| 靜態網站產生器 | Hugo **Extended** 0.145.0（CI 固定版本） |
+| 主題 | [hugo-coder](https://github.com/luizdepra/hugo-coder)，直接放在 `themes/`（非 submodule） |
+| 語言 | 繁體中文 `/zh/`（預設）、English `/en/` |
+| 部署 | push 到 `main` → GitHub Actions 建置 → 提交 `docs/` → GitHub Pages |
+| 自訂網域 | `static/CNAME` → `blog.hicat0x0.uk` |
 
 ---
 
-## 1. 快速開始
+## 目錄
 
-1) 安裝 Hugo Extended（建議 v0.131.0 或更新）
-- Linux/macOS：可使用官方文件或套件管理器安裝
-- 驗證
-  ```
-  hugo version
-  # 例：hugo v0.131.0+extended ...
-  ```
-
-2) 切換到專案目錄
-```
-cd /root/workspace/blog
-```
-
-3) 本機啟動開發伺服器
-```
-hugo server --bind 0.0.0.0 --port 1313
-
-rm -rf docs public && hugo --minify --baseURL "https://HiDomesticCat.github.io/blog/"
-mkdir -p docs && cp -r public/* docs/ || true
-git add .
-git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit"
-git push origin main
-git push --force origin main
-
-hugo server --bind 0.0.0.0 --port 1313 --baseURL http://192.168.10.13:1313
-```
-- 於瀏覽器開啟：http://localhost:1313/
-- 預設語言路徑：/zh/（繁體中文）、/en/（English）
-- 若在遠端環境，請依實際主機 IP/網域替換
+- [快速開始](#快速開始)
+- [目錄結構](#目錄結構)
+- [撰寫內容](#撰寫內容)
+- [多語言](#多語言)
+- [自訂樣式與腳本](#自訂樣式與腳本)
+- [目錄（TOC）](#目錄toc)
+- [模板覆寫](#模板覆寫)
+- [部署流程](#部署流程)
+- [常見問題](#常見問題)
 
 ---
 
-## 2. 目錄結構（重點）
+## 快速開始
+
+### 1. 安裝 Hugo Extended
+
+必須是 **Extended** 版本（主題用 SCSS，一般版會建置失敗）。
+建議與 CI 對齊到 **0.145.0**。
+
+```bash
+hugo version
+# 應包含 "+extended"，例：hugo v0.145.0+extended
+```
+
+若手邊沒有套件管理器，也可以用 npm 取得同版本的二進位檔：
+
+```bash
+npm install hugo-extended@0.145.0
+```
+
+### 2. 取得原始碼
+
+主題已經 vendored 在 `themes/hugo-coder`，`git clone` 之後不需要再 `submodule update`。
+
+```bash
+git clone https://github.com/HiDomesticCat/blog.git
+cd blog
+```
+
+### 3. 本機預覽
+
+```bash
+./build-and-deploy.sh serve
+```
+
+- 繁中：<http://localhost:1313/zh/>
+- 英文：<http://localhost:1313/en/>
+- 根路徑 `/` 由 `static/index.html` 轉址到 `/zh/`
+
+要用與 CI 相同的參數做一次完整建置檢查：
+
+```bash
+./build-and-deploy.sh build
+```
+
+> 這支腳本**不會**動 git、也不會寫 `docs/`。部署是 CI 的工作，見下方[部署流程](#部署流程)。
+
+---
+
+## 目錄結構
 
 ```
 blog/
-├─ config.toml                 # Hugo 主設定（多語、選單、主題參數）
+├─ config.toml                    # 全站設定（多語、選單、主題參數）
 ├─ content/
-│  ├─ zh/                      # 繁中內容（首頁：content/zh/_index.md）
-│  └─ en/                      # 英文內容（首頁：content/en/_index.md）
-├─ layouts/                    # 自訂模板（必要時覆寫主題模板）
-├─ static/
-│  ├─ index.html               # 根路徑 / 的靜態頁（目前導向 /zh/）
-│  ├─ css/custom.css           # 備用自訂樣式（未啟用）
-│  └─ js/custom.js             # 備用自訂腳本（未啟用）
-├─ assets/
-│  ├─ css/custom.css           # 資產管線版本（未啟用）
-│  └─ js/custom.js             # 資產管線版本（未啟用）
-├─ themes/hugo-coder/          # 主題
-├─ .gitignore                  # 忽略 public/、resources/、.hugo_build.lock
-└─ （build 輸出）public/、resources/（不進版控）
+│  ├─ zh/                         # 繁中內容
+│  │  ├─ _index.md                #   首頁 front matter（內容不會顯示，見下方說明）
+│  │  ├─ about.md / projects.md / contact.md
+│  │  └─ posts/                   #   文章
+│  └─ en/                         # 英文內容（結構同上）
+├─ layouts/                       # 覆寫主題模板（只放有改的檔案）
+│  ├─ 404.html                    #   404 頁：自動嘗試另一語系
+│  ├─ _default/single.html
+│  ├─ posts/single.html           #   文章頁（已接上 TOC）
+│  └─ partials/
+│     ├─ head.html                #   複製自主題 + 加上 hreflang
+│     ├─ page.html                #   一般頁面（已接上 TOC）
+│     └─ toc.html                 #   目錄，主題本身沒有
+├─ i18n/                          # 專案層級翻譯字串（與主題的 i18n 合併）
+│  ├─ zh.toml
+│  └─ en.toml
+├─ assets/                        # ★ 走 Hugo 資產管線（會被 minify + fingerprint）
+│  ├─ css/custom.css              #   自訂樣式（實際生效的就是這份）
+│  ├─ js/custom.js                #   自訂腳本
+│  └─ js/coder.js                 #   覆寫主題的 coder.js，修深淺色切換
+├─ static/                        # 原樣複製到網站根目錄
+│  ├─ CNAME                       #   自訂網域
+│  ├─ index.html                  #   / → /zh/ 轉址頁
+│  └─ images/hicat0x0.png         #   頭像
+├─ themes/hugo-coder/             # 主題（vendored）
+├─ docs/                          # ★ 建置產物，由 CI 自動提交，不要手改
+└─ .github/workflows/deploy.yml   # 建置與部署
 ```
 
----
+### `assets/` 與 `static/` 的差別（重要）
 
-## 3. 開發模式（本機預覽）
+| 目錄 | 處理方式 | 用途 |
+|------|----------|------|
+| `assets/` | 經 Hugo 資產管線（`resources.Get` → minify → fingerprint） | 自訂 CSS/JS |
+| `static/` | 原樣複製，不處理 | CNAME、圖片、轉址頁 |
 
-- 啟動
-  ```
-  cd /root/workspace/blog
-  hugo server --bind 0.0.0.0 --port 1313
-  ```
-- 停用 Fast Render（完整重建）
-  ```
-  hugo server --disableFastRender
-  ```
-- 預覽路徑
-  - 繁中首頁：http://localhost:1313/zh/
-  - 英文首頁：http://localhost:1313/en/
-
-注意：根路徑 `/` 目前由 `static/index.html` 轉址到 `/zh/`。
+hugo-coder 是用 **`resources.Get`** 讀 `customCSS` / `customJS` 的，
+**只會在 `assets/` 底下找**。放到 `static/` 不但不會生效，還會被原樣發佈成沒人引用的死檔案。
 
 ---
 
-## 4. 多語設定與首頁顯示
+## 撰寫內容
 
-- `config.toml` 已啟用：
-  ```toml
-  defaultContentLanguage = "zh"
-  defaultContentLanguageInSubdir = true
-  ```
-  代表預設語言為繁中，並強制語言子路徑（/zh、/en）。
+### 新增文章
 
-- 首頁內容檔：
-  - 繁中首頁：`content/zh/_index.md`
-  - 英文首頁：`content/en/_index.md`
-  兩者可分別填寫不同的 `title` 或內容，使 /zh 與 /en 顯示不同文字。
-
-- 首頁顯示來源（hugo-coder）
-  - 使用主題 `layouts/index.html`（呼叫 `partials/home.html`）
-  - `partials/home/author.html` 會讀 `.Site.Params.author`、`.Site.Params.info`
-  - 已於 `config.toml` 設定語言專屬參數：
-    ```toml
-    [languages.zh.params]
-      author = "技術研究者"
-      info = ["資訊安全研究員","無線通訊專家","量子計算愛好者","雲端架構師"]
-
-    [languages.en.params]
-      author = "Tech Researcher"
-      info = ["Information Security Researcher","Wireless Communications Expert","Quantum Computing Enthusiast","Cloud Architect"]
-    ```
-  因此 /zh 與 /en 首頁將顯示不同文字。
-
-- 選單（Menu）也採多語段落：
-  ```toml
-  [[languages.zh.menu.main]]
-  [[languages.en.menu.main]]
-  ```
-  各自維護。
-
----
-
-## 5. 內容撰寫
-
-- 新增文章（以繁中為例）
-  ```
-  hugo new zh/posts/my-article.md
-  ```
-  英文：
-  ```
-  hugo new en/posts/my-article.md
-  ```
-
-- Front Matter（YAML/TOML/JSON 皆可）
-  範例（TOML）：
-  ```toml
-  +++
-  title = "標題"
-  date = "2025-08-24"
-  description = "文章摘要"
-  slug = "my-article"
-  tags = ["tag1","tag2"]
-  categories = ["分類"]
-  +++
-  文章內文...
-  ```
-
-- 清單頁（Section）標題
-  - `content/zh/posts/_index.md`、`content/en/posts/_index.md` 用於設定 posts 清單頁屬性
-
-### 5.1 圖片（3 種方式）
-
-1) 放在 `static/images/`（全站共用）
-- 檔案路徑：`static/images/diagram.png`
-- Markdown 引用：
-  ```md
-  ![圖示說明](/images/diagram.png "可選的標題")
-  ```
-- 優點：簡單、直觀；中英文皆可共用同張圖  
-- 注意：以 `/` 開頭（網站根目錄）
-
-2) Page Bundle（與文章同資料夾）
-- 目錄型文章：
-  ```
-  content/zh/posts/my-article/index.md
-  content/zh/posts/my-article/figure1.png
-  ```
-- 引用（相對路徑）：
-  ```md
-  ![說明](figure1.png)
-  ```
-- 也可用 `figure` 短代碼（可加標題/來源）：
-  ```md
-  {{< figure src="figure1.png" title="圖 1：系統架構" alt="系統架構示意圖" >}}
-  ```
-
-3) HTML 更細控制（寬度/樣式）
-```html
-<img src="/images/diagram.png" alt="示意圖" style="max-width: 600px; width: 100%;" />
+```bash
+hugo new zh/posts/my-article.md
 ```
 
-建議：多語內容若需不同圖，可各語言各自 Page Bundle；若共用，放在 `static/images/`。
+Front matter 範例：
 
-### 5.2 程式碼與語法標示
-
-- 首選：圍欄語法（fenced code blocks），指定語言：
-  ````
-  ```go
-  package main
-
-  import "fmt"
-
-  func main() {
-      fmt.Println("Hello, Hugo")
-  }
-  ```
-  ````
-- 進階：`highlight` 短代碼（可行號/高亮）：
-  ```md
-  {{< highlight python "linenos=table,hl_lines=2-3,linenostart=1" >}}
-  def add(a, b):
-      return a + b
-  print(add(2, 3))
-  {{< /highlight >}}
-  ```
-  參數示例：
-  - `linenos=true` 或 `linenos=table`：顯示行號
-  - `hl_lines=2-3`：高亮第 2–3 行
-  - `linenostart=1`：行號起始值
-
-提示：若想直接在 fenced code 使用行高亮等屬性，需另外啟用 Goldmark attributes；目前未開啟，建議用 `highlight` 短代碼。
-
-### 5.3 數學公式（KaTeX）
-
-主題在 `partials/posts/math.html` 已整合 KaTeX。啟用方式（二擇一或皆可）：
-
-- 全站啟用（`config.toml`）：
-  ```toml
-  [params]
-    math = true
-  # 或
-  # katex = true
-  ```
-- 單篇啟用（Front Matter）：
-  ```toml
-  +++
-  title = "含數學的文章"
-  date = "2025-08-24"
-  math = true
-  +++
-  ```
-
-可用分隔符：
-- 行內：`$ a^2 + b^2 = c^2 $` 或 `\( a^2 + b^2 = c^2 \)`
-- 區塊：`$$ E = mc^2 $$` 或 `\[ E = mc^2 \]`
-
-範例：
-```md
-行內：在直角三角形中，$a^2 + b^2 = c^2$。
-
-區塊：
-$$
-\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
-$$
-```
-
-注意：
-- Markdown 內底線 `_`、反斜線 `\` 等可能需跳脫
-- 若未渲染，檢查本文或全站是否已啟用 `math=true`/`katex=true`
-
-### 5.4 Mermaid 圖表/流程圖
-
-主題支援 `mermaid` 短代碼（首頁模板會自動載入腳本，當檢測到該短代碼）。
-
-範例：
-```md
-{{< mermaid >}}
-graph TD
-  A[開始] --> B{條件?}
-  B -- 是 --> C[流程 1]
-  B -- 否 --> D[流程 2]
-{{< /mermaid >}}
-```
-
----
-
-## 6. 靜態資源與資產管線
-
-- `static/` 內檔案：原樣發佈到網站根目錄（不經管線處理）
-- `assets/` 內檔案：可由 Hugo 管線處理（minify/fingerprint 等）
-- 主題 hugo-coder 的 `head/custom-styles.html`、`baseof.html` 對 `.Site.Params.customCSS/customJS` 使用 `resources.Get`，因此若啟用自訂資源，請將檔案放在 `assets/`（而非 `static/`）
-
----
-
-## 7. 自訂樣式與腳本（如何啟用/停用）
-
-- 目前為保留主題原生風格，`config.toml` 已停用：
-  ```toml
-  # customCSS = ["css/custom.css"]
-  # customJS  = ["js/custom.js"]
-  ```
-- 若要啟用：
-  1) 確保檔案存在於：
-     ```
-     assets/css/custom.css
-     assets/js/custom.js
-     ```
-  2) 於 `config.toml` 啟用
-     ```toml
-     [params]
-       customCSS = ["css/custom.css"]
-       customJS  = ["js/custom.js"]
-     ```
-  3) 重新啟動 `hugo server`
-- 注意：若路徑指向 `static/` 檔案，主題的 `resources.Get` 會找不到，導致「nil pointer evaluating resource.Resource.RelPermalink」錯誤。請放在 `assets/`。
-
-- Avatar 與 OG 圖片
-  - 目前為避免 404，已註解：
-    ```toml
-    # avatarURL = "images/avatar.jpg"
-    # images = ["images/og-image.png"]
-    ```
-  - 若要啟用，請先放入：
-    ```
-    static/images/avatar.jpg
-    static/images/og-image.png
-    ```
-    然後取消註解。
-
----
-
-## 8. 部署（產生 Public 靜態檔案）
-
-- 產生產出（預設輸出至 `public/`）
-  ```
-  cd /root/workspace/blog
-  hugo --minify
-  ```
-- 將 `public/` 上傳至靜態網站主機（GitHub Pages、Netlify、雲主機 Nginx 等）
-- 如採 CI/CD，請勿將 `public/` 納入版控，本專案 `.gitignore` 已忽略
-
----
-
-## 9. 清理與版本控制
-
-- 清除產物：
-  ```
-  rm -rf public resources .hugo_build.lock
-  ```
-- `.gitignore`（位於 blog/）已忽略：
-  ```
-  public/
-  resources/
-  .hugo_build.lock
-  ```
-
----
-
-## 10. 常見問題（FAQ）
-
-1) 啟用 customCSS/customJS 後出現 `$styles.RelPermalink` nil 錯誤  
-   - 原因：主題以 `resources.Get` 載入，需要檔案位於 `assets/`  
-   - 解法：將 `css/custom.css`、`js/custom.js` 放到 `assets/`，並於 `config.toml` 啟用。
-
-2) 首頁多語文字相同  
-   - 檢查 `config.toml` 的 `[languages.zh.params]` 與 `[languages.en.params]` 是否已設定不同值  
-   - 也可直接在 `content/zh/_index.md`、`content/en/_index.md` 寫入不同內容。
-
-3) 根路徑 `/` 顯示行為  
-   - 目前 `static/index.html` 會導向 `/zh/`  
-   - 若欲改為語言選擇頁，可替換該檔案內容為自訂選擇頁（或移除並採伺服器層導向）。
-
-4) WARN: found no layout file for "json" for kind "home"  
-   - 問題來源：`[outputs] home = ["HTML","RSS","JSON"]` 但主題未提供對應 JSON 模板  
-   - 解法：可忽略、或在 `layouts/` 提供自訂 JSON 模板、或移除 `JSON` 輸出類型。
-
----
-
-## 11. 變更紀錄摘要（此次優化）
-
-- 清除測試/樣張與建置產物：
-  - 刪除樣張 `content/en/posts/welcome.md`
-  - 刪除主題 exampleSite（避免引入大量範例內容）
-  - 刪除 `public/`、`resources/`、`.hugo_build.lock`；新增 `.gitignore`
-- 維持主題原生風格、避免缺檔：
-  - 停用自訂 CSS/JS（已保留 assets 對應檔，隨時可啟用）
-  - 註解 avatar 與 og-image 設定（待檔案就緒再啟用）
-- 多語設定：
-  - 啟用 `defaultContentLanguageInSubdir = true`（/zh、/en）
-  - 對 zh/en 設定不同的 `[languages.xx.params]`，使首頁文字不同
-  - `static/index.html` 目前將根路徑導向 `/zh/`
-
----
-
-## 12. 範例：完整含圖片/程式碼/公式/流程圖的文章
-
-以繁中為例，建立 Page Bundle 型文章：
-
-```
-content/zh/posts/demo/index.md
-content/zh/posts/demo/arch.png
-```
-
-`index.md` 內容參考：
 ```toml
 +++
-title = "Demo：圖片、程式碼、公式與流程圖"
-date = "2025-08-24"
-description = "示範 Hugo 文章常見元素"
-slug = "demo-all-in-one"
-tags = ["demo","hugo","mermaid","math","code"]
-categories = ["教學"]
-math = true
+title = "文章標題"
+date = 2026-08-23
+slug = "my-article"            # ★ 一定要寫，理由見下
+description = "給搜尋引擎與社群分享卡片看的摘要"
+tags = ["tag1", "tag2"]
+categories = ["技術"]
+# toc = false                  # 單篇關閉目錄（預設吃全站設定）
+# draft = true                 # 草稿不會發佈
 +++
 ```
 
-接著撰寫 Markdown 內容：
-```md
-## 圖片（Page Bundle）
-{{< figure src="arch.png" title="系統架構圖" alt="Arch" >}}
+> **`slug` 一定要寫。**
+> 網址規則是 `permalinks.posts = "/posts/:slug/"`。沒有 `slug` 時 Hugo 會拿中文標題去組網址，
+> 產生像 `/zh/posts/在-android-上使用-rtl-sdr-v4完整入門與進階教學/` 這種百分號編碼、
+> 不利於分享與 SEO 的路徑。
+>
+> 如果要改既有文章的 `slug`，記得用 `aliases` 保留舊網址：
+>
+> ```toml
+> aliases = ["/zh/posts/舊的網址/"]
+> ```
+>
+> `aliases` 需要含語言前綴（`/zh/...`），否則產生的轉址頁會落在網站根目錄。
 
-## 程式碼（Go）
-{{< highlight go "linenos=table,hl_lines=4-6" >}}
-package main
+### 標題層級
 
-import "fmt"
+正文請用 Markdown 的 `##` / `###`，不要用純文字當小標。
+標題會決定目錄、錨點與 SEO 結構。
 
-func main() {
-    fmt.Println("Demo")
-}
-{{< /highlight >}}
+### 圖片
 
-## 數學公式
-行內：$a^2 + b^2 = c^2$
+1. 全站共用：放 `static/images/`，用 `![說明](/images/foo.png)` 引用
+2. Page Bundle：`content/zh/posts/my-article/index.md` + 同資料夾圖片，用 `![說明](foo.png)`
+3. 需要控制寬度時可直接寫 HTML（`markup.goldmark.renderer.unsafe = true` 已開啟）
 
-區塊：
-$$
-\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
-$$
+### 程式碼
 
-## Mermaid
-{{< mermaid >}}
-sequenceDiagram
-  participant U as User
-  participant H as Hugo
-  U->>H: Write content
-  H-->>U: Build site
-{{< /mermaid >}}
+用圍欄語法並標明語言：
+
+````markdown
+```bash
+rtl_tcp -a 0.0.0.0 -p 1234
+```
+````
+
+配色來自主題的 `_syntax.scss`（`markup.highlight.noClasses = false`，
+所以 Chroma 輸出的是 CSS class，設 `style` 不會有效果）。
+
+### 數學與圖表
+
+- **KaTeX**：`config.toml` 加 `math = true`，或單篇 front matter 加 `math = true`
+- **Mermaid**：用 `{{< mermaid >}}` 短代碼，主題會自動載入腳本
+
+---
+
+## 多語言
+
+```toml
+defaultContentLanguage         = "zh"
+defaultContentLanguageInSubdir = true
 ```
 
-英文可於 `content/en/posts/demo/index.md` 撰寫對應內容；圖片共用可放 `static/images/`，或各語系分別維護 Page Bundle。
+- 兩種語言都帶前綴：`/zh/`、`/en/`
+- 每個語言各自維護 `[languages.xx.params]`（作者、描述、關鍵字、首頁 info 列表）與 `[[languages.xx.menu.main]]`
+- 同名檔案（例如 `content/zh/about.md` 與 `content/en/about.md`）會自動被視為互為翻譯，
+  `layouts/partials/head.html` 會據此輸出 `hreflang` 給搜尋引擎
+
+### 首頁的內容不會顯示
+
+hugo-coder 的首頁（`partials/home.html`）只渲染頭像、作者、`params.info` 清單與社群圖示，
+**不會渲染 `content/xx/_index.md` 的內文**。
+`_index.md` 的 `title` 與 `description` 仍會影響 `og:title` / `og:description`，所以還是要寫。
+
+要改首頁那幾行字，是改 `config.toml` 的 `[languages.xx.params].info`。
 
 ---
 
-## 13. 推薦工作流程
+## 自訂樣式與腳本
 
-- 本機編輯 + 預覽（`hugo server`）
-- 內容完成後使用 `hugo --minify` 產出
-- 將 `public/` 發佈到靜態主機
-- 需要自訂風格時，再啟用 `customCSS/customJS`，並確保資源放在 `assets/` 目錄
+```toml
+[params]
+  customCSS = ["css/custom.css"]   # → assets/css/custom.css
+  customJS  = ["js/custom.js"]     # → assets/js/custom.js
+```
+
+`assets/js/custom.js` 目前提供：回到頂部按鈕、閱讀進度條、程式碼複製按鈕、
+外部連結開新分頁、深色模式切換動畫、目錄捲動高亮、錨點平滑捲動。
+
+`assets/js/coder.js` **覆寫**了主題同名檔案，差別是：
+
+- 用 `addEventListener('change', …)` 取代已棄用的 `addListener`
+- 只有在使用者沒手動選過主題時才跟隨系統深淺色（原本會蓋掉使用者的選擇）
+
+> 主題升級時要記得比對 `themes/hugo-coder/assets/js/coder.js` 是否有變動，
+> 這是整份覆寫，不是 patch。
 
 ---
 
-有任何需求（如語言選擇首頁、特定區塊翻譯、版面微調），可在 `layouts/` 建立對應模板覆寫主題，或於 `config.toml` / `content` 層級進行設定與內容差異化。
+## 目錄（TOC）
+
+hugo-coder 沒有目錄功能，這裡自己補了 `layouts/partials/toc.html`。
+
+```toml
+[params]
+  enableToc      = true   # 全站開關
+  tocMinHeadings = 3      # 標題少於這個數量就不顯示
+
+[markup.tableOfContents]
+  startLevel = 2          # 從 ## 開始
+  endLevel   = 4          # 到 #### 為止
+```
+
+單篇要關掉就在 front matter 寫 `toc = false`。
+
+樣式在 `assets/css/custom.css` 的 `.toc` / `#TableOfContents` 區塊，
+捲動高亮在 `assets/js/custom.js`。
+
+---
+
+## 模板覆寫
+
+`layouts/` 底下只放**有修改**的檔案，其餘沿用主題。目前覆寫了：
+
+| 檔案 | 為什麼 |
+|------|--------|
+| `partials/head.html` | 複製自主題，額外輸出 `hreflang` 多語連結 |
+| `partials/page.html` | 一般頁面加上目錄 |
+| `partials/toc.html` | 新增，主題沒有目錄功能 |
+| `posts/single.html` | 文章頁加上目錄 |
+| `_default/single.html` | 統一標題格式 |
+| `404.html` | 找不到頁面時自動試另一個語系 |
+
+升級主題後請檢查 `partials/head.html`，那是整份複製的。
+
+---
+
+## 部署流程
+
+```
+push 到 main
+   └─> .github/workflows/deploy.yml
+         ├─ 安裝 Hugo Extended 0.145.0
+         ├─ hugo --minify --gc --baseURL https://blog.hicat0x0.uk/
+         ├─ 驗證 public/ 有 index.html、zh、en、CNAME
+         └─ 複製 public/ → docs/、加 .nojekyll、commit 並 push
+               └─> GitHub Pages 從 main 分支的 docs/ 提供服務
+```
+
+- 部署 commit 帶 `[skip ci]`，不會觸發第二輪建置
+- `concurrency: deploy-pages` 確保同時只跑一個部署，避免兩次 push 打架
+- **`docs/` 不要手動編輯**，下一次 CI 會整個覆蓋掉
+- 也可以在 GitHub 的 Actions 頁面用 `workflow_dispatch` 手動觸發
+
+### GitHub Pages 設定
+
+Settings → Pages → Source = `Deploy from a branch`，
+Branch = `main`，資料夾 = `/docs`，Custom domain = `blog.hicat0x0.uk`。
+
+---
+
+## 常見問題
+
+**啟用 `customCSS` / `customJS` 後出現 `nil pointer evaluating resource.Resource.RelPermalink`**
+
+檔案放錯位置了。主題用 `resources.Get` 載入，必須放在 `assets/`，不是 `static/`。
+
+**改了 `static/css/custom.css` 卻沒有任何變化**
+
+那個路徑不會被引用。實際生效的是 `assets/css/custom.css`。
+（這兩份重複檔案已在 2026-08 移除。）
+
+**中文文章網址是一長串百分號編碼**
+
+front matter 少了 `slug`。補上後記得加 `aliases` 保留舊網址。
+
+**首頁改了 `_index.md` 沒反應**
+
+首頁不渲染 `_index.md` 內文，見[多語言](#多語言)一節。
+
+**`WARN found no layout file for "json" for kind "home"`**
+
+`[outputs] home` 曾包含 `JSON`，但主題沒有對應模板。已改成 `["HTML", "RSS"]`。
+
+**建置失敗，說 SCSS 相關錯誤**
+
+裝到非 Extended 版的 Hugo 了。`hugo version` 要看到 `+extended`。

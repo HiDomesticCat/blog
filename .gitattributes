@@ -1,0 +1,14 @@
+# 統一以 LF 存進 repo，避免 Windows / Linux 混用時整份檔案顯示為變更
+* text=auto eol=lf
+
+# Shell 腳本一定要是 LF，否則在 Linux 上會 "bad interpreter"
+*.sh    text eol=lf
+
+# 二進位檔不要做任何換行轉換
+*.png   binary
+*.jpg   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.ico   binary

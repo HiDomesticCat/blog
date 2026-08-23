@@ -1,49 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# 本機建置 / 預覽腳本
+#
+#   ./build-and-deploy.sh serve   # 啟動本機預覽伺服器（含草稿）
+#   ./build-and-deploy.sh build   # 用與 CI 相同的參數做一次建置檢查（預設）
+#
+# 注意：實際部署由 GitHub Actions 負責（.github/workflows/deploy.yml）。
+#       這支腳本刻意不碰 git、也不寫 docs/，避免與 CI 互相覆蓋。
+#
+set -euo pipefail
 
-# Hugo Blog Build and Deploy Script
-# This script ensures CNAME file is always present in docs directory
+BASE_URL="https://blog.hicat0x0.uk/"
+PORT="${PORT:-1313}"
+MODE="${1:-build}"
 
-set -e  # Exit on any error
+command -v hugo >/dev/null 2>&1 || {
+  echo "找不到 hugo。請先安裝 Hugo Extended（CI 使用 0.145.0）。" >&2
+  exit 1
+}
 
-echo "🚀 Starting Hugo blog build and deploy process..."
+echo "使用的 Hugo：$(hugo version)"
 
-# Step 1: Clean up old builds
-echo "🧹 Cleaning up old builds..."
-rm -rf docs public
+case "$MODE" in
+  serve)
+    echo "啟動預覽伺服器 → http://localhost:${PORT}/zh/"
+    exec hugo server --bind 0.0.0.0 --port "$PORT" --buildDrafts --disableFastRender
+    ;;
 
-# Step 2: Ensure CNAME file exists in static directory
-echo "📝 Ensuring CNAME file exists..."
-if [ ! -f "static/CNAME" ]; then
-    echo "blog.hicat0x0.uk" > static/CNAME
-    echo "✅ Created CNAME file in static directory"
-else
-    echo "✅ CNAME file already exists in static directory"
-fi
+  build)
+    echo "清除舊的產出…"
+    rm -rf public resources .hugo_build.lock
 
-# Step 3: Build Hugo site
-echo "🔨 Building Hugo site..."
-hugo --minify --baseURL "https://blog.hicat0x0.uk/"
+    echo "建置中（與 CI 相同參數）…"
+    hugo --minify --gc --baseURL "$BASE_URL"
 
-# Step 4: Create docs directory and copy files
-echo "📁 Creating docs directory and copying files..."
-mkdir -p docs
-cp -r public/* docs/ || true
+    echo "檢查產出…"
+    fail=0
+    for f in public/index.html public/zh/index.html public/en/index.html public/CNAME; do
+      if [ -f "$f" ]; then
+        echo "  OK   $f"
+      else
+        echo "  FAIL $f 不存在"
+        fail=1
+      fi
+    done
+    [ "$fail" -eq 0 ] || { echo "建置檢查未通過。" >&2; exit 1; }
 
-# Step 5: Verify CNAME file exists in docs
-if [ -f "docs/CNAME" ]; then
-    echo "✅ CNAME file successfully copied to docs directory"
-    echo "📋 CNAME content: $(cat docs/CNAME)"
-else
-    echo "❌ Warning: CNAME file not found in docs directory"
-    echo "🔧 Creating CNAME file manually..."
-    echo "blog.hicat0x0.uk" > docs/CNAME
-fi
+    echo "CNAME → $(cat public/CNAME)"
+    echo "建置完成。產出在 public/（不進版控；部署交給 GitHub Actions）。"
+    ;;
 
-# Step 6: Git operations
-#echo "📤 Committing and pushing changes..."
-#git add .
-#git commit -m "Recreate docs from fresh Hugo build [skip ci]" || echo "No changes to commit"
-#git push --force origin main
-
-#echo "🎉 Build and deploy completed successfully!"
-#echo "🌐 Your blog should be available at: https://blog.hicat0x0.uk"
+  *)
+    echo "用法：$0 [serve|build]" >&2
+    exit 2
+    ;;
+esac

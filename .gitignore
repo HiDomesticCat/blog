@@ -1,7 +1,14 @@
-# Hugo build outputs
+# Hugo 建置產物（docs/ 由 CI 產生並提交，故不在此忽略）
 public/
 resources/
 .hugo_build.lock
 
-# OS / editor noise
+# 相依套件 / 工具
+node_modules/
+
+# OS / 編輯器雜訊
 .DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

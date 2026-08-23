@@ -3,9 +3,20 @@ name: Build and deploy Hugo site
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+# 同時間只跑一個部署，避免兩次 push 互相覆蓋 docs/ 造成 git push 衝突
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: '0.145.0'
+  BASE_URL: 'https://blog.hicat0x0.uk/'
+  TZ: 'Asia/Taipei'
 
 jobs:
   build-deploy:
@@ -15,25 +26,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: peaceiris/actions-hugo@v2
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: '0.145.0'
+          hugo-version: ${{ env.HUGO_VERSION }}
           extended: true
 
       - name: Build site
-        run: hugo --minify --baseURL "https://blog.hicat0x0.uk/"
-
-      - name: Deploy to docs/
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUGO_ENVIRONMENT: production
+        run: |
+          hugo --minify --gc --baseURL "$BASE_URL"
+
+      - name: Verify build output
+        run: |
+          test -f public/index.html      || { echo "::error::public/index.html missing"; exit 1; }
+          test -f public/zh/index.html   || { echo "::error::public/zh/index.html missing"; exit 1; }
+          test -f public/en/index.html   || { echo "::error::public/en/index.html missing"; exit 1; }
+          test -f public/CNAME           || { echo "::error::public/CNAME missing (check static/CNAME)"; exit 1; }
+          echo "CNAME -> $(cat public/CNAME)"
+
+      - name: Publish to docs/
         run: |
           rm -rf docs
           mkdir -p docs
-          cp -r public/* docs/
-          echo "blog.hicat0x0.uk" > docs/CNAME
-          git config user.name "github-actions[bot]"
+          cp -r public/. docs/
+          # GitHub Pages 預設會跑 Jekyll，會吃掉底線開頭的檔案；停掉它
+          touch docs/.nojekyll
+
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs
+          git add -A docs
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
