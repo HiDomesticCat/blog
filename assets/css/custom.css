@@ -88,6 +88,7 @@ body.colorscheme-dark {
 
 .container.page article h3 {
   margin-top: 2rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ===== Code blocks ===== */
@@ -121,7 +122,20 @@ body.colorscheme-dark blockquote {
   background: var(--custom-bg-card);
 }
 
-/* ===== TOC ===== */
+/* ===== TOC (wrapper from layouts/partials/toc.html) ===== */
+.toc {
+  margin: 0 0 2rem;
+}
+
+.toc .toc-title {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--custom-text-muted);
+}
+
+/* The <nav id="TableOfContents"> that Hugo generates */
 #TableOfContents {
   background: var(--custom-bg-card);
   border: 1px solid var(--custom-border-color);
@@ -271,12 +285,6 @@ body.colorscheme-dark tr:hover td {
 .copy-code-button:hover {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
-}
-
-/* ===== Project cards (used in projects.md) ===== */
-.container.page article h3 {
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
 }
 
 /* ===== Responsive tweaks ===== */

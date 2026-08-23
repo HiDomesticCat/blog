@@ -1,227 +1,254 @@
-baseURL = "https://blog.hicat0x0.uk/"
-title = "hicat0x0 blog"
-theme = "hugo-coder"
-languageCode = "zh-Hant"
-defaultContentLanguage = "zh"
+# =============================================================================
+#  hicat0x0 blog — Hugo 設定
+#  主題：hugo-coder（vendored 於 themes/hugo-coder）
+#  建置：GitHub Actions（.github/workflows/deploy.yml）→ docs/ → GitHub Pages
+# =============================================================================
+
+baseURL    = "https://blog.hicat0x0.uk/"
+title      = "hicat0x0 blog"
+theme      = "hugo-coder"
+
+# 多語：/zh 與 /en 都帶語言前綴；根路徑 / 由 static/index.html 轉址到 /zh/
+defaultContentLanguage        = "zh"
 defaultContentLanguageInSubdir = true
-enableEmoji = true
+
+enableEmoji    = true
 enableRobotsTXT = true
-enableGitInfo = false
+enableGitInfo  = false
 
 [pagination]
-pagerSize = 10
+  pagerSize = 10
 
+# -----------------------------------------------------------------------------
+# Markdown / 語法標示
+# -----------------------------------------------------------------------------
 [markup]
   [markup.highlight]
-    noClasses = false
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true
+    # noClasses = false → Chroma 輸出 CSS class，配色由主題的 _syntax.scss 提供
+    # （因此不要設 style，設了也不會生效）
+    noClasses      = false
+    guessSyntax    = true
+    lineNos        = false
+    codeFences     = true
+    tabWidth       = 4
 
+  [markup.goldmark.renderer]
+    unsafe = true            # 允許 Markdown 內嵌原生 HTML
+
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel   = 4
+    ordered    = false
+
+# -----------------------------------------------------------------------------
+# 全站參數（各語言可於 [languages.*.params] 覆寫）
+# -----------------------------------------------------------------------------
 [params]
-  author = "hicat0x0"
-  description = "探索前沿科技，分享研究心得 | 資訊安全 • 無線通訊 • 量子電腦 • 雲端技術"
+  author      = "hicat0x0"
+  description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得。"
+  keywords    = "資訊安全,網路安全,CTF,逆向工程,無線通訊,SDR,量子計算,雲端系統,OpenStack,DevOps"
+  info        = ["資訊安全", "無線通訊", "逆向工程", "量子計算", "雲端系統"]
+
   mainSections = ["posts"]
-  keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
-  info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
-  avatarURL = "images/hicat0x0.png"
-  dateFormat = "2006年1月2日"
-  since = 2025
-  colorScheme = "auto"
-  hideColorSchemeToggle = false
-  maxSeeAlsoItems = 5
-  
-  # 新增功能
-  enableToc = true
-  enableTocContent = true
+  avatarURL    = "images/hicat0x0.png"
+  dateFormat   = "2006年1月2日"
+  since        = 2025
+
+  colorScheme            = "auto"
+  hideColorSchemeToggle  = false
+  maxSeeAlsoItems        = 5
+  readingTime            = true
+
+  # 目錄（TOC）— 由 layouts/partials/toc.html 實作，hugo-coder 本身沒有這功能
+  #   enableToc         全站開關；單篇可用 front matter 的 toc = true/false 覆寫
+  #   tocMinHeadings    少於這個標題數就不顯示目錄
+  enableToc      = true
+  tocMinHeadings = 3
+
+  # 自訂樣式與腳本 —— 路徑相對於 assets/（主題以 resources.Get 載入，不是 static/）
   customCSS = ["css/custom.css"]
-  customJS = ["js/custom.js"]
-  
-  # 社交媒體卡片
-  # images = ["images/og-image.png"]  # commented to avoid missing file 404
-  
-  # 閱讀時間
-  readingTime = true
-  
-  # 程式碼高亮主題
-  pygmentsStyle = "monokai"
-  pygmentsCodeFences = true
-  pygmentsUseClasses = false
-  pygmentsCodefencesGuessSyntax = true
-  
-  # 評論系統（可選）
-  # disqusShortname = "your-disqus-shortname"
-  # utterancesRepo = "your-github-username/your-repo-name"
-  # utterancesIssueTerm = "pathname"
-  # utterancesTheme = "github-light"
+  customJS  = ["js/custom.js"]
+
+  # 社交分享卡片圖（放到 static/images/og-image.png 後再取消註解）
+  # images = ["images/og-image.png"]
 
 [[params.social]]
-  name = "Github"
-  icon = "fa-brands fa-github fa-2x"
+  name   = "Github"
+  icon   = "fa-brands fa-github fa-2x"
   weight = 1
-  url = "https://github.com/HiDomesticCat"
+  url    = "https://github.com/HiDomesticCat"
 
 [[params.social]]
-  name = "LinkedIn"
-  icon = "fa-brands fa-linkedin fa-2x"
+  name   = "LinkedIn"
+  icon   = "fa-brands fa-linkedin fa-2x"
   weight = 2
-  url = "https://www.linkedin.com/in/jing-ping-yu-392940248/"
-
-#[[params.social]]
-#  name = "Twitter"
-#  icon = "fa-brands fa-twitter fa-2x"
-#  weight = 3
-#  url = "https://twitter.com/your-username"
-
-#[[params.social]]
-#  name = "RSS"
-#  icon = "fa-solid fa-rss fa-2x"
-#  weight = 4
-#  url = "/index.xml"
+  url    = "https://www.linkedin.com/in/jing-ping-yu-392940248/"
 
 [[params.social]]
-  name = "Email"
-  icon = "fa-solid fa-envelope fa-2x"
+  name   = "LeetCode"
+  icon   = "fa-solid fa-code fa-2x"
+  weight = 3
+  url    = "https://leetcode.com/u/hicat0x0/"
+
+[[params.social]]
+  name   = "RSS"
+  icon   = "fa-solid fa-rss fa-2x"
+  weight = 9
+  url    = "index.xml"
+  rel    = "alternate"
+  type   = "application/rss+xml"
+
+[[params.social]]
+  name   = "Email"
+  icon   = "fa-solid fa-envelope fa-2x"
   weight = 10
-  url = "mailto:hicat0x0@hicat0x0.uk"
+  url    = "mailto:hicat0x0@hicat0x0.uk"
 
-[taxonomies]
-  category = "categories"
-  tag = "tags"
-  author = "authors"
-
-[permalinks]
-  posts = "/posts/:slug/"
-
+# -----------------------------------------------------------------------------
+# 語言
+# -----------------------------------------------------------------------------
 [languages]
 
   [languages.zh]
     languageName = "繁體中文"
-    title = "hicat0x0"
-    weight = 1
-    contentDir = "content/zh"
+    languageCode = "zh-Hant"
+    title        = "hicat0x0"
+    weight       = 1
+    contentDir   = "content/zh"
 
     [languages.zh.params]
-      author = "于京平 (hicat0x0)"
+      author      = "于京平 (hicat0x0)"
       description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得 | 資訊安全 • 無線通訊 • 逆向工程 • 雲端系統"
-      keywords = "資訊安全,網路安全,CTF,逆向工程,無線通訊,量子電腦,雲端系統,Kubernetes,DevOps,IoT"
-      info = ["資訊安全","無線通訊","逆向工程","量子計算","雲端系統"]
+      keywords    = "資訊安全,網路安全,CTF,逆向工程,無線通訊,SDR,量子電腦,雲端系統,OpenStack,DevOps,IoT"
+      info        = ["資訊安全", "無線通訊", "逆向工程", "量子計算", "雲端系統"]
 
     [[languages.zh.menu.main]]
-      name = "首頁"
+      name   = "首頁"
       weight = 1
-      url = "zh/"
+      url    = "/zh/"
 
     [[languages.zh.menu.main]]
-      name = "文章"
+      name   = "文章"
       weight = 2
-      url = "posts/"
+      url    = "posts/"
 
     [[languages.zh.menu.main]]
-      name = "分類"
+      name   = "分類"
       weight = 3
-      url = "categories/"
+      url    = "categories/"
 
     [[languages.zh.menu.main]]
-      name = "標籤"
+      name   = "標籤"
       weight = 4
-      url = "tags/"
+      url    = "tags/"
 
     [[languages.zh.menu.main]]
-      name = "關於"
+      name   = "關於"
       weight = 5
-      url = "about/"
+      url    = "about/"
 
     [[languages.zh.menu.main]]
-      name = "專案"
+      name   = "專案"
       weight = 6
-      url = "projects/"
+      url    = "projects/"
 
     [[languages.zh.menu.main]]
-      name = "聯絡"
+      name   = "聯絡"
       weight = 7
-      url = "contact/"
+      url    = "contact/"
 
   [languages.en]
     languageName = "English"
-    title = "hicat0x0"
-    weight = 2
-    contentDir = "content/en"
+    languageCode = "en"
+    title        = "hicat0x0"
+    weight       = 2
+    contentDir   = "content/en"
 
     [languages.en.params]
-      author = "hicat0x0"
-      # description = "探索前沿科技，分享研究心得 | 資訊安全 • 無線通訊 • 量子電腦 • 雲端技術"
-      # keywords = "資訊安全,網路安全,5G,6G,無線通訊,量子計算,量子密碼學,雲端原生,Kubernetes,DevOps,微服務"
-      # info = ["資訊安全","無線通訊","量子計算","網管與雲端"]
+      author      = "Jing-Ping Yu (hicat0x0)"
+      description = "Notes on information security and wireless communications | Security • Wireless • Reverse Engineering • Cloud Systems"
+      keywords    = "information security,cybersecurity,CTF,reverse engineering,wireless,SDR,quantum computing,cloud,OpenStack,DevOps,IoT"
+      info        = ["Information Security", "Wireless Communications", "Reverse Engineering", "Quantum Computing", "Cloud Systems"]
 
     [[languages.en.menu.main]]
-      name = "Home"
+      name   = "Home"
       weight = 1
-      url = "en/"
+      url    = "/en/"
 
     [[languages.en.menu.main]]
-      name = "Posts"
+      name   = "Posts"
       weight = 2
-      url = "posts/"
+      url    = "posts/"
 
     [[languages.en.menu.main]]
-      name = "Categories"
+      name   = "Categories"
       weight = 3
-      url = "categories/"
+      url    = "categories/"
 
     [[languages.en.menu.main]]
-      name = "Tags"
+      name   = "Tags"
       weight = 4
-      url = "tags/"
+      url    = "tags/"
 
     [[languages.en.menu.main]]
-      name = "About"
+      name   = "About"
       weight = 5
-      url = "about/"
+      url    = "about/"
 
     [[languages.en.menu.main]]
-      name = "Projects"
+      name   = "Projects"
       weight = 6
-      url = "projects/"
+      url    = "projects/"
 
     [[languages.en.menu.main]]
-      name = "Contact"
+      name   = "Contact"
       weight = 7
-      url = "contact/"
+      url    = "contact/"
+
+# -----------------------------------------------------------------------------
+# 分類 / 網址 / 輸出
+# -----------------------------------------------------------------------------
+[taxonomies]
+  category = "categories"
+  tag      = "tags"
+
+[permalinks]
+  posts = "/posts/:slug/"
 
 [outputs]
-  home = [ "HTML", "RSS", "JSON" ]
-  section = [ "HTML", "RSS" ]
+  # 主題沒有 home 的 JSON 模板，加了只會產生建置警告，故不啟用
+  home    = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
 
 [sitemap]
   changefreq = "weekly"
-  filename = "sitemap.xml"
-  priority = 0.5
+  filename   = "sitemap.xml"
+  priority   = 0.5
 
+# -----------------------------------------------------------------------------
+# 隱私 / 相關文章
+# -----------------------------------------------------------------------------
 [privacy]
-  [privacy.googleAnalytics]
-    anonymizeIP = true
-    respectDoNotTrack = true
   [privacy.youtube]
     privacyEnhanced = true
 
-[services]
-  [services.googleAnalytics]
-    # ID = "UA-XXXXXXXX-X"
-
 [related]
   includeNewer = true
-  threshold = 80
-  toLower = true
+  threshold    = 80
+  toLower      = true
+
   [[related.indices]]
-    name = "keywords"
+    name   = "keywords"
     weight = 100
+
   [[related.indices]]
-    name = "tags"
+    name   = "tags"
     weight = 80
+
   [[related.indices]]
-    name = "categories"
+    name   = "categories"
     weight = 50
+
   [[related.indices]]
-    name = "date"
+    name   = "date"
     weight = 10

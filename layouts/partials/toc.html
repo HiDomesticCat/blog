@@ -1,0 +1,21 @@
+{{/*
+  目錄（Table of Contents）
+  hugo-coder 本身沒有 TOC，這個 partial 補上，並沿用 assets/css/custom.css
+  既有的 #TableOfContents 樣式與 assets/js/custom.js 的捲動高亮。
+
+  站台參數：
+    params.enableToc      bool  全站開關（預設 false）
+    params.tocMinHeadings int   標題數少於此值就不顯示（預設 3）
+  單篇覆寫：
+    front matter 的 toc = true / false
+  標題層級由 config.toml 的 [markup.tableOfContents] 控制。
+*/}}
+{{ $on := .Site.Params.enableToc | default false }}
+{{ if isset .Params "toc" }}{{ $on = .Params.toc }}{{ end }}
+{{ $min := .Site.Params.tocMinHeadings | default 3 }}
+{{ if and $on (ge (len .Fragments.Identifiers) $min) }}
+  <aside class="toc" role="doc-toc" aria-labelledby="toc-title">
+    <h2 class="toc-title" id="toc-title">{{ i18n "toc" }}</h2>
+    {{ .TableOfContents }}
+  </aside>
+{{ end }}

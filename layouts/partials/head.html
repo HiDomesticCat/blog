@@ -1,0 +1,37 @@
+{{/*
+  覆寫 themes/hugo-coder/layouts/partials/head.html
+  差異：加上多語 hreflang 連結（主題原本沒有），其餘與主題相同。
+  升級主題時請比對上游這個檔案是否有變動。
+*/}}
+{{ partial "head/meta-tags.html" . }}
+
+{{ if .Params.canonicalUrl }}
+<link rel="canonical" href="{{ .Params.canonicalUrl }}">
+{{ else }}
+<link rel="canonical" href="{{ .Permalink }}">
+{{ end }}
+
+{{/* hreflang：同一篇內容有其他語言版本時，互相標註給搜尋引擎。
+     x-default 指向繁中版（根路徑 / 也是轉址到 /zh/）。 */}}
+{{ with .AllTranslations }}
+  {{ range . }}
+<link rel="alternate" hreflang="{{ .Language.LanguageCode | default .Language.Lang }}" href="{{ .Permalink }}">
+  {{ end }}
+  {{ range where . "Language.Lang" "eq" "zh" }}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+  {{ end }}
+{{ end }}
+
+{{ partialCached "head/theme-styles.html" . }}
+
+{{ partialCached "head/color-scheme.html" . }}
+
+{{ partialCached "head/custom-styles.html" . }}
+
+{{ partialCached "head/custom-icons.html" . }}
+
+{{ partial "head/alternative-output-formats.html" . }}
+
+{{ if .IsHome }}{{ partial "head/hugo-generator.html" . }}{{ end }}
+
+{{ partial "head/extensions.html" . }}

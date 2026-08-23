@@ -1,0 +1,3 @@
+# 專案層級翻譯字串（會與 themes/hugo-coder/i18n/zh.toml 合併，同名鍵以此處為準）
+[toc]
+other = "目錄"
