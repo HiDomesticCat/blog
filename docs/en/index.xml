@@ -1,19 +1,91 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Home on hicat0x0</title><link>https://blog.hicat0x0.uk/en/</link><description>Recent content in Home on hicat0x0</description><generator>Hugo</generator><language>en</language><atom:link href="https://blog.hicat0x0.uk/en/index.xml" rel="self" type="application/rss+xml"/><item><title>About Me</title><link>https://blog.hicat0x0.uk/en/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/about/</guid><description>&lt;h1 id="not-now">
- Not now
- &lt;a class="heading-link" href="#not-now">
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jing-Ping Yu (hicat0x0) on hicat0x0</title><link>https://blog.hicat0x0.uk/en/</link><description>Recent content in Jing-Ping Yu (hicat0x0) on hicat0x0</description><generator>Hugo</generator><language>en</language><atom:link href="https://blog.hicat0x0.uk/en/index.xml" rel="self" type="application/rss+xml"/><item><title>About Me</title><link>https://blog.hicat0x0.uk/en/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/about/</guid><description>&lt;h2 id="introduction">
+ Introduction
+ &lt;a class="heading-link" href="#introduction">
  &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
  &lt;span class="sr-only">Link to heading&lt;/span>
  &lt;/a>
-&lt;/h1></description></item><item><title>Contact Me</title><link>https://blog.hicat0x0.uk/en/contact/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/contact/</guid><description>&lt;h1 id="not-now">
- Not now
- &lt;a class="heading-link" href="#not-now">
+&lt;/h2>
+&lt;p>I&amp;rsquo;m &lt;strong>Jing-Ping Yu&lt;/strong> (hicat0x0), currently a graduate student in the
+&lt;strong>Master Program in Information Security (MPIS)&lt;/strong> at
+&lt;strong>National Taipei University of Technology&lt;/strong>.
+I received my B.S. in &lt;strong>Computer Science and Information Engineering&lt;/strong>
+from &lt;strong>National University of Tainan&lt;/strong> in 2026.&lt;/p>
+&lt;p>My work centres on &lt;strong>offensive and defensive security&lt;/strong>,
+&lt;strong>wireless communications and SDR&lt;/strong>, &lt;strong>cloud and virtualisation systems&lt;/strong>,
+and forward-looking topics such as &lt;strong>quantum computing&lt;/strong>.
+During my undergraduate years I was active in the Taiwanese security
+community and in CTF competitions, building hands-on experience in
+vulnerability analysis, reverse engineering and system defence.&lt;/p></description></item><item><title>Contact Me</title><link>https://blog.hicat0x0.uk/en/contact/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/contact/</guid><description>&lt;p>If you have a question, a collaboration idea, or just want to talk shop,
+here&amp;rsquo;s how to reach me.&lt;/p>
+&lt;hr>
+&lt;h2 id="email">
+ Email
+ &lt;a class="heading-link" href="#email">
  &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
  &lt;span class="sr-only">Link to heading&lt;/span>
  &lt;/a>
-&lt;/h1></description></item><item><title>Projects</title><link>https://blog.hicat0x0.uk/en/projects/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/projects/</guid><description>&lt;h1 id="not-now">
- Not now
- &lt;a class="heading-link" href="#not-now">
+&lt;/h2>
+&lt;p>&lt;a href="mailto:hicat0x0@hicat0x0.uk" >hicat0x0@hicat0x0.uk&lt;/a>&lt;/p>
+&lt;hr>
+&lt;h2 id="profiles">
+ Profiles
+ &lt;a class="heading-link" href="#profiles">
  &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
  &lt;span class="sr-only">Link to heading&lt;/span>
  &lt;/a>
-&lt;/h1></description></item></channel></rss>
+&lt;/h2>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th>Platform&lt;/th>
+ &lt;th>Handle&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td>GitHub&lt;/td>
+ &lt;td>&lt;a href="https://github.com/HiDomesticCat" class="external-link" target="_blank" rel="noopener">HiDomesticCat&lt;/a>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>LinkedIn&lt;/td>
+ &lt;td>&lt;a href="https://www.linkedin.com/in/jing-ping-yu-392940248/" class="external-link" target="_blank" rel="noopener">Jing-Ping Yu&lt;/a>&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td>LeetCode&lt;/td>
+ &lt;td>&lt;a href="https://leetcode.com/u/hicat0x0/" class="external-link" target="_blank" rel="noopener">hicat0x0&lt;/a>&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;hr>
+&lt;h2 id="open-notes">
+ Open Notes
+ &lt;a class="heading-link" href="#open-notes">
+ &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
+ &lt;span class="sr-only">Link to heading&lt;/span>
+ &lt;/a>
+&lt;/h2>
+&lt;p>I keep my course notes and learning resources on an open notes site:&lt;/p></description></item><item><title>Projects</title><link>https://blog.hicat0x0.uk/en/projects/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/projects/</guid><description>&lt;p>Projects and research directions I lead or contribute to.
+The full list lives on
+&lt;a href="https://github.com/HiDomesticCat?tab=repositories" class="external-link" target="_blank" rel="noopener">GitHub @HiDomesticCat&lt;/a>.&lt;/p>
+&lt;hr>
+&lt;h2 id="security--systems-research">
+ Security &amp;amp; Systems Research
+ &lt;a class="heading-link" href="#security--systems-research">
+ &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
+ &lt;span class="sr-only">Link to heading&lt;/span>
+ &lt;/a>
+&lt;/h2>
+&lt;h3 id="dcfs--zero-knowledge-encrypted-cloud-file-system">
+ DCFS — Zero-Knowledge Encrypted Cloud File System
+ &lt;a class="heading-link" href="#dcfs--zero-knowledge-encrypted-cloud-file-system">
+ &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
+ &lt;span class="sr-only">Link to heading&lt;/span>
+ &lt;/a>
+&lt;/h3>
+&lt;p>A cloud file system on AWS serverless infrastructure, built around the idea that
+the server should never see your files.
+Files marked private are encrypted in the browser before they leave it:
+a master key (MEK) is derived from a separate encryption passphrase via PBKDF2,
+each file gets a one-time data key (DEK) that encrypts the contents with AES-GCM,
+and the DEK itself is wrapped under the MEK before being uploaded alongside the IV —
+so the server only ever holds ciphertext and a wrapped key.&lt;/p></description></item></channel></rss>
