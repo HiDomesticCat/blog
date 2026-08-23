@@ -22,6 +22,8 @@
 - [自訂樣式與腳本](#自訂樣式與腳本)
 - [目錄（TOC）](#目錄toc)
 - [模板覆寫](#模板覆寫)
+- [首頁的一句話](#首頁的一句話)
+- [頭像與圖示](#頭像與圖示)
 - [部署流程](#部署流程)
 - [常見問題](#常見問題)
 
@@ -87,23 +89,29 @@ blog/
 │  └─ en/                         # 英文內容（結構同上）
 ├─ layouts/                       # 覆寫主題模板（只放有改的檔案）
 │  ├─ 404.html                    #   404 頁：自動嘗試另一語系
+│  ├─ robots.txt                  #   加上 Sitemap 指向
 │  ├─ _default/single.html
 │  ├─ posts/single.html           #   文章頁（已接上 TOC）
 │  └─ partials/
 │     ├─ head.html                #   複製自主題 + 加上 hreflang
 │     ├─ page.html                #   一般頁面（已接上 TOC）
-│     └─ toc.html                 #   目錄，主題本身沒有
+│     ├─ toc.html                 #   目錄，主題本身沒有
+│     ├─ home/author.html         #   首頁：名字 + 一句話（取代關鍵字清單）
+│     └─ head/custom-icons.html   #   只輸出實際存在的 icon
 ├─ i18n/                          # 專案層級翻譯字串（與主題的 i18n 合併）
 │  ├─ zh.toml
 │  └─ en.toml
 ├─ assets/                        # ★ 走 Hugo 資產管線（會被 minify + fingerprint）
 │  ├─ css/custom.css              #   自訂樣式（實際生效的就是這份）
 │  ├─ js/custom.js                #   自訂腳本
-│  └─ js/coder.js                 #   覆寫主題的 coder.js，修深淺色切換
+│  ├─ js/coder.js                 #   覆寫主題的 coder.js，修深淺色切換
+│  └─ images/avatar-source.jpg    #   頭像原始圖（不會發佈，只用來重新產生圖示）
 ├─ static/                        # 原樣複製到網站根目錄
 │  ├─ CNAME                       #   自訂網域
 │  ├─ index.html                  #   / → /zh/ 轉址頁
-│  └─ images/hicat0x0.png         #   頭像
+│  ├─ favicon.ico                 #   圖示（見「頭像與圖示」）
+│  ├─ site.webmanifest
+│  └─ images/                     #   avatar.png、favicon-*.png、apple-touch-icon.png…
 ├─ themes/hugo-coder/             # 主題（vendored）
 ├─ docs/                          # ★ 建置產物，由 CI 自動提交，不要手改
 └─ .github/workflows/deploy.yml   # 建置與部署
@@ -202,11 +210,11 @@ defaultContentLanguageInSubdir = true
 
 ### 首頁的內容不會顯示
 
-hugo-coder 的首頁（`partials/home.html`）只渲染頭像、作者、`params.info` 清單與社群圖示，
+hugo-coder 的首頁（`partials/home.html`）只渲染頭像、作者、一句話與社群圖示，
 **不會渲染 `content/xx/_index.md` 的內文**。
 `_index.md` 的 `title` 與 `description` 仍會影響 `og:title` / `og:description`，所以還是要寫。
 
-要改首頁那幾行字，是改 `config.toml` 的 `[languages.xx.params].info`。
+要改首頁那句話，是改 `config.toml` 的 `[languages.xx.params].tagline`，見下一節。
 
 ---
 
@@ -259,13 +267,91 @@ hugo-coder 沒有目錄功能，這裡自己補了 `layouts/partials/toc.html`�
 | 檔案 | 為什麼 |
 |------|--------|
 | `partials/head.html` | 複製自主題，額外輸出 `hreflang` 多語連結 |
+| `partials/head/custom-icons.html` | 主題會無條件輸出 6 個 icon 連結，其中 SVG 那兩個做不出來；改成只輸出真的存在的檔案 |
+| `partials/home/author.html` | 首頁改成「名字 + 一句話」，取代關鍵字清單 |
 | `partials/page.html` | 一般頁面加上目錄 |
 | `partials/toc.html` | 新增，主題沒有目錄功能 |
 | `posts/single.html` | 文章頁加上目錄 |
 | `_default/single.html` | 統一標題格式 |
 | `404.html` | 找不到頁面時自動試另一個語系 |
+| `robots.txt` | 加上 `Sitemap:` 指向 |
 
 升級主題後請檢查 `partials/head.html`，那是整份複製的。
+
+---
+
+## 首頁的一句話
+
+首頁名字下面那一行由 `params.tagline` 決定，是語言層級參數，中英各寫各的：
+
+```toml
+[languages.zh.params]
+  tagline = """
+不被觀測的東西，會安靜地不見。
+所以我習慣自己打開箱子看看。"""
+```
+
+- 字串裡的**換行就是斷行**，所以可以寫一行，也可以寫成對句
+- 每一行各自過 `markdownify`，內容有被跳脫，也還能用 `*強調*`
+- 沒設 `tagline` 時，會自動退回主題原本的 `params.info` 清單行為
+
+> **TOML 陷阱**：一般的 `"..."` 字串裡不能有真的換行，會出現
+> `unmarshal failed: toml: basic strings cannot have new lines` 而整個設定檔載不進去。
+> 要用三引號的多行字串 `"""`（緊接在開頭引號後的換行會被 TOML 自動去掉）。
+
+樣式在 `assets/css/custom.css` 的 `.tagline` 區塊。
+斷行由上面的換行決定，`max-width` 只是安全網 —— 設太窄會搶著替英文換行，
+把對句擠成三四行。
+
+---
+
+## 頭像與圖示
+
+全部由 `assets/images/avatar-source.jpg` 產生。`assets/` 底下沒被引用的檔案不會發佈，
+所以原始圖留在 repo 裡只是為了日後能重新產生，不會多佔一份流量。
+
+產生的檔案：
+
+| 檔案 | 尺寸 | 用途 |
+|------|------|------|
+| `static/images/avatar.png` | 400×400 | 首頁頭像（顯示 200px，2× 螢幕用） |
+| `static/images/favicon-32x32.png` / `-16x16.png` | 32 / 16 | 瀏覽器分頁 |
+| `static/favicon.ico` | 16/32/48 | 直接抓 `/favicon.ico` 的舊瀏覽器與爬蟲 |
+| `static/images/apple-touch-icon.png` | 180×180 | iOS 加到主畫面 |
+| `static/images/android-chrome-*.png` | 192 / 512 | `site.webmanifest` 引用 |
+
+要換頭像，換掉 `assets/images/avatar-source.jpg` 後重跑（需要 Pillow）：
+
+```bash
+python - <<'PY'
+from PIL import Image
+import os
+src = Image.open('assets/images/avatar-source.jpg').convert('RGB')
+# 先裁成正方形；下面的框是針對目前這張圖算出來的，換圖記得重算
+sq = src.crop((26, 7, 800, 781))
+out = 'static/images'
+def gen(size, name, quantize=True):
+    im = sq.resize((size, size), Image.LANCZOS)
+    if quantize:
+        im = im.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.NONE)
+    im.save(os.path.join(out, name), 'PNG', optimize=True)
+gen(400, 'avatar.png')
+gen(180, 'apple-touch-icon.png')
+gen(192, 'android-chrome-192x192.png')
+gen(512, 'android-chrome-512x512.png')
+gen(32, 'favicon-32x32.png', quantize=False)
+gen(16, 'favicon-16x16.png', quantize=False)
+sq.resize((64, 64), Image.LANCZOS).save('static/favicon.ico', sizes=[(16,16),(32,32),(48,48)])
+PY
+```
+
+- **要裁成正方形**：頭像套 `border-radius: 50%`，非正方形會被壓扁
+- **256 色量化**：像素風配上 JPEG 壓縮雜訊很難壓，量化後 400×400 從 182 KB 降到 74 KB，
+  實測 RMS 差異只有 1.5%，肉眼看不出來。16／32 的小圖不量化，保持銳利
+
+> 主題的 `head/custom-icons.html` 原本會無條件輸出 `favicon.svg` 與
+> `safari-pinned-tab.svg`，那兩個是向量檔、沒辦法從點陣頭像產生，
+> 導致每次載入都噴 404。已覆寫成只輸出實際存在的檔案。
 
 ---
 
@@ -315,6 +401,15 @@ front matter 少了 `slug`。補上後記得加 `aliases` 保留舊網址。
 **`WARN found no layout file for "json" for kind "home"`**
 
 `[outputs] home` 曾包含 `JSON`，但主題沒有對應模板。已改成 `["HTML", "RSS"]`。
+
+**改了 CSS 的 `font-size`，字卻小到看不見**
+
+主題設了 `html { font-size: 62.5% }`，所以 `assets/css/custom.css` 裡 **`1rem = 10px`，不是 16px**
+（`body` 是 `1.8rem` = 18px）。照一般 16px 基準的直覺寫 `1.1rem` 會得到 11px。檔頭有註記。
+
+**改了 `config.toml` 之後整個站建不起來，說 `basic strings cannot have new lines`**
+
+TOML 的一般字串 `"..."` 不能含真的換行。多行內容（例如 `tagline`）要用 `"""`。
 
 **建置失敗，說 SCSS 相關錯誤**
 

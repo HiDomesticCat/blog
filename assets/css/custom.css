@@ -1,6 +1,10 @@
 /* ==============================================
    Custom Styles for hugo-coder theme
    Enhances the theme without overriding its core
+
+   ⚠ 單位注意：主題設了 html { font-size: 62.5% }，
+     所以這份檔案裡 1rem = 10px，不是 16px。
+     body 是 1.8rem = 18px。寫字級時請照這個尺標。
    ============================================== */
 
 /* ===== CSS Variables ===== */
@@ -131,7 +135,7 @@ body.colorscheme-dark blockquote {
   margin: 0 0 0.5rem;
   padding: 0;
   border: none;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
   color: var(--custom-text-muted);
 }
 
@@ -211,11 +215,29 @@ body.colorscheme-dark tr:hover td {
   margin: 1rem 0;
 }
 
-/* ===== Home page .about info items spacing ===== */
+/* ===== Home: 名字下方的一句話 =====
+   由 layouts/partials/home/author.html 輸出，取代主題原本的關鍵字清單。
+   刻意只留字距與留白，不加引號、線條或任何裝飾。 */
+.about .tagline {
+  /* 斷行由 params.tagline 裡的換行決定；max-width 只是安全網，
+     設太窄會搶著替英文換行，把對句擠成三行。 */
+  max-width: 44ch;
+  margin: 1.8rem auto 0;
+  font-size: 1.7rem;
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0.05em;
+  color: var(--custom-text-muted);
+  text-wrap: balance;
+}
+
+/* 沿用 info 清單時（未設 tagline）的間距 */
 .about h2 {
   margin-bottom: 0.25rem;
 }
 
+/* .about 裡唯一的 ul 是社群圖示列 —— 不是 info 清單。
+   （info 由主題渲染成 <h2> 加 <br>，從來就不是 ul。） */
 .about ul {
   list-style: none;
   padding: 0;
@@ -223,11 +245,6 @@ body.colorscheme-dark tr:hover td {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem 1.25rem;
-}
-
-.about ul li {
-  position: relative;
-  padding-left: 0;
 }
 
 /* ===== Back-to-top button (injected by JS) ===== */
@@ -289,10 +306,16 @@ body.colorscheme-dark tr:hover td {
 
 /* ===== Responsive tweaks ===== */
 @media (max-width: 768px) {
+  /* 社群圖示在窄螢幕仍然橫排，只縮間距。
+     先前這裡設 flex-direction: column，會把圖示排成直的一條。 */
   .about ul {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
+    gap: 0.5rem 0.9rem;
+  }
+
+  .about .tagline {
+    /* 窄螢幕交給 vw 決定，34ch 之類的固定字數會把英文對句拆成四行 */
+    max-width: 92vw;
+    font-size: 1.6rem;
   }
 
   #TableOfContents {

@@ -50,7 +50,7 @@ enableGitInfo  = false
   info        = ["資訊安全", "無線通訊", "逆向工程", "量子計算", "雲端系統"]
 
   mainSections = ["posts"]
-  avatarURL    = "images/hicat0x0.png"
+  avatarURL    = "images/avatar.png"
   dateFormat   = "2006年1月2日"
   since        = 2025
 
@@ -120,7 +120,9 @@ enableGitInfo  = false
       author      = "于京平 (hicat0x0)"
       description = "資安與無線通訊研究與實作，分享技術筆記、CTF 解題與專題心得 | 資訊安全 • 無線通訊 • 逆向工程 • 雲端系統"
       keywords    = "資訊安全,網路安全,CTF,逆向工程,無線通訊,SDR,量子電腦,雲端系統,OpenStack,DevOps,IoT"
-      info        = ["資訊安全", "無線通訊", "逆向工程", "量子計算", "雲端系統"]
+      tagline     = """
+不被觀測的東西，會安靜地不見。
+所以我習慣自己打開箱子看看。"""
 
     [[languages.zh.menu.main]]
       name   = "首頁"
@@ -168,7 +170,9 @@ enableGitInfo  = false
       author      = "Jing-Ping Yu (hicat0x0)"
       description = "Notes on information security and wireless communications | Security • Wireless • Reverse Engineering • Cloud Systems"
       keywords    = "information security,cybersecurity,CTF,reverse engineering,wireless,SDR,quantum computing,cloud,OpenStack,DevOps,IoT"
-      info        = ["Information Security", "Wireless Communications", "Reverse Engineering", "Quantum Computing", "Cloud Systems"]
+      tagline     = """
+What goes unobserved disappears quietly.
+So I make a habit of opening the box."""
 
     [[languages.en.menu.main]]
       name   = "Home"

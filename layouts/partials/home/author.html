@@ -1,0 +1,30 @@
+{{/*
+  覆寫 themes/hugo-coder/layouts/partials/home/author.html
+
+  首頁改成「名字 + 一句話」的極簡呈現，取代主題原本把 params.info
+  用 <br> 疊成一串關鍵字的做法。
+
+    params.tagline  設了就顯示這一句。字串裡的 \n 會斷行，
+                    所以可以寫成一行，也可以寫成對句。
+    params.info     沒設 tagline 時，維持主題原本的清單行為（相容用）
+
+  兩者都是語言層級參數，中英可以各寫各的。
+  每一行各自過 markdownify，所以內容有被跳脫，也還能用 *強調*。
+*/}}
+<h1>{{ .Site.Params.author }}</h1>
+
+{{ with .Site.Params.tagline }}
+  <p class="tagline">
+    {{- $lines := split (trim . "\n ") "\n" -}}
+    {{- range $i, $line := $lines -}}
+      {{- if $i }}<br>{{ end -}}
+      {{- trim $line " " | markdownify -}}
+    {{- end -}}
+  </p>
+{{ else }}
+  {{ if reflect.IsSlice $.Site.Params.info }}
+  <h2>{{ range $.Site.Params.info }}{{ . | markdownify }}<br>{{ end }}</h2>
+  {{ else }}
+  <h2>{{ $.Site.Params.info | markdownify }}</h2>
+  {{ end }}
+{{ end }}

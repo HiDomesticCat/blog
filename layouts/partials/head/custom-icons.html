@@ -1,0 +1,14 @@
+{{/*
+  覆寫 themes/hugo-coder/layouts/partials/head/custom-icons.html
+
+  主題原版無條件輸出 6 個 icon 連結，包含 favicon.svg 與 safari-pinned-tab.svg。
+  那兩個是向量檔，沒辦法從點陣頭像產生；主題也不管檔案存不存在就照輸出，
+  結果是每次載入頁面都噴一輪 404。這裡只輸出實際有產生的檔案。
+
+  圖示由 assets/images/avatar-source.jpg 產生，見 README。
+*/}}
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="any">
+<link rel="icon" type="image/png" href="{{ "images/favicon-32x32.png" | relURL }}" sizes="32x32">
+<link rel="icon" type="image/png" href="{{ "images/favicon-16x16.png" | relURL }}" sizes="16x16">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "images/apple-touch-icon.png" | relURL }}">
+<link rel="manifest" href="{{ "site.webmanifest" | relURL }}">
