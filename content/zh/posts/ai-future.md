@@ -1,7 +1,7 @@
 ---
 title: "人工智慧的未來發展趨勢"
 date: 2024-01-20T10:00:00+08:00
-draft: false
+draft: true   # 佔位範例文章，未發佈；要上線請改回 false
 slug: "ai-future"
 categories: ["技術"]
 tags: ["AI", "機器學習", "未來科技"]

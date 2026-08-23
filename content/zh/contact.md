@@ -1,6 +1,7 @@
 +++
 title = "聯絡我"
 slug = "contact"
+description = "與于京平（hicat0x0）聯絡：Email、GitHub、LinkedIn 與開放筆記站。"
 +++
 
 如果你有任何問題、合作提案，或只是想聊聊技術，歡迎透過以下方式聯繫我。
@@ -15,9 +16,11 @@ slug = "contact"
 
 ## 社群帳號
 
-- **GitHub**：[HiDomesticCat](https://github.com/HiDomesticCat)
-- **LinkedIn**：[于京平](https://www.linkedin.com/in/jing-ping-yu-392940248/)
-- **LeetCode**：[hicat0x0](https://leetcode.com/u/hicat0x0/)
+| 平台 | 帳號 |
+|------|------|
+| GitHub | [HiDomesticCat](https://github.com/HiDomesticCat) |
+| LinkedIn | [于京平](https://www.linkedin.com/in/jing-ping-yu-392940248/) |
+| LeetCode | [hicat0x0](https://leetcode.com/u/hicat0x0/) |
 
 ---
 
