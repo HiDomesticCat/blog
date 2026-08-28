@@ -107,6 +107,30 @@ function addIntrinsicSize(svg) {
     + svg.slice(open.index + tag.length);
 }
 
+/**
+ * 把容器標籤從「上方置中」移到「左上角」。
+ *
+ * 為什麼要做：容器標籤預設貼在容器上緣正中間，而由上往下進入容器的連線
+ * 剛好也走中間 —— 箭頭會直接穿過標籤文字。實測 elk 與 dagre 都會發生。
+ *
+ * 為什麼在這裡改而不是寫在 house.d2：
+ * D2 的 glob `*.label.near: top-left` 沒辦法只挑容器，會把一般節點的文字
+ * 也推到角落（實測一般節點從置中 0,0 變成 -79,-79）。
+ * 但編譯結果裡容器的 labelPosition 就是 INSIDE_TOP_CENTER、
+ * 一般節點是 INSIDE_MIDDLE_CENTER，用這個判斷剛好精準命中容器。
+ * 實測改完之後碰撞歸零，而所有一般節點的標籤位置一格都沒動。
+ */
+function moveContainerLabels(diagram) {
+  let n = 0;
+  for (const s of (diagram.shapes || [])) {
+    if (s.labelPosition === 'INSIDE_TOP_CENTER') {
+      s.labelPosition = 'INSIDE_TOP_LEFT';
+      n++;
+    }
+  }
+  return n;
+}
+
 function retargetDarkCss(svg) {
   const marker = '@media screen and (prefers-color-scheme:dark)';
   const i = svg.indexOf(marker);
@@ -179,6 +203,7 @@ for (const b of blocks) {
     // HOUSE 已經算進雜湊，所以改了配色，所有圖都會重新渲染。
     const source = (HOUSE ? HOUSE + '\n' : '') + b.src.replace(/\r\n/g, '\n').trim();
     const r = await d2.compile(source, { layout: b.raw.layout });
+    moveContainerLabels(r.diagram);
     let svg = await d2.render(r.diagram, { ...r.renderOptions, ...renderOptsFrom(b.raw) });
     await fs.writeFile(outPath, addIntrinsicSize(retargetDarkCss(svg)), 'utf8');
     rendered++;
