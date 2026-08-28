@@ -71,7 +71,9 @@ hasCJKLanguage = true
 
   mainSections = ["posts"]
   avatarURL    = "images/avatar.png"
-  dateFormat   = "2006年1月2日"
+  # 後備值。實際格式由各語言的 [languages.*.params] 覆寫 ——
+  # 這個參數只寫在全站的話，英文版的文章列表也會印出「2026年8月28日」。
+  dateFormat   = "January 2, 2006"
   since        = 2025
 
   colorScheme            = "auto"
@@ -143,6 +145,7 @@ hasCJKLanguage = true
       tagline     = """
 不被觀測的東西，會安靜地不見。
 所以我習慣自己打開箱子看看。"""
+      dateFormat  = "2006年1月2日"
 
     [[languages.zh.menu.main]]
       name   = "首頁"
@@ -193,6 +196,7 @@ hasCJKLanguage = true
       tagline     = """
 What goes unobserved disappears quietly.
 So I make a habit of opening the box."""
+      dateFormat  = "January 2, 2006"
 
     [[languages.en.menu.main]]
       name   = "Home"
