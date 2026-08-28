@@ -16,6 +16,11 @@ enableEmoji    = true
 enableRobotsTXT = true
 enableGitInfo  = false
 
+# 自動偵測頁面裡的中日韓文字，改用 CJK 的字數與閱讀時間演算法。
+# 不開的話 Hugo 以空白切詞，中文整段會被算成極少的「字」——
+# 這篇 4,340 字的文章只會被算成 518 字、顯示「閱讀時間 3 分鐘」。
+hasCJKLanguage = true
+
 [pagination]
   pagerSize = 10
 

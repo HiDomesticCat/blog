@@ -172,9 +172,77 @@ categories = ["技術"]
 
 ### 圖片
 
-1. 全站共用：放 `static/images/`，用 `![說明](/images/foo.png)` 引用
-2. Page Bundle：`content/zh/posts/my-article/index.md` + 同資料夾圖片，用 `![說明](foo.png)`
-3. 需要控制寬度時可直接寫 HTML（`markup.goldmark.renderer.unsafe = true` 已開啟）
+**照片多的文章請用 Page Bundle**，圖片跟文章放在一起，整包好搬好刪：
+
+```
+content/zh/posts/my-article/
+├─ index.md
+├─ 01-something.jpg
+└─ 02-other.jpg
+```
+
+⚠ **Page Bundle 底下的每個檔案都會被發佈**，包含子目錄。沒有用到的照片不要留在裡面
+（放進 `unused/` 也沒用，一樣會被複製到 `docs/`）。
+
+單張圖用 Hugo 內建的 `figure` 短代碼，才會有正確的 `<figure>` / `<figcaption>` 結構：
+
+```markdown
+{{< figure src="01-something.jpg" alt="給螢幕閱讀器與圖片載入失敗時看的" caption="圖說" >}}
+```
+
+多張圖併排用 `gallery`（`layouts/shortcodes/gallery.html`）：
+
+```markdown
+{{< gallery >}}
+{{< figure src="a.jpg" caption="第一張" >}}
+{{< figure src="b.jpg" caption="第二張" >}}
+{{< figure src="c.jpg" caption="第三張" >}}
+{{< /gallery >}}
+```
+
+- `cols="2"` 固定欄數；不給就依容器寬度自動決定，窄螢幕一律單欄
+- `ratio="16 / 9"` 調整每格比例，預設 `3 / 4`（手機直拍的比例）
+- 格子裡的圖會**裁切**成一致比例好排版，但點開看到的仍是完整原圖
+
+**所有內文圖片都可以點擊放大**（lightbox，`assets/js/custom.js`）。
+支援 Esc／點背景／右上角 ✕ 關閉，也能用鍵盤操作。
+包在連結裡的圖片（例如單位 logo）不會被攔截，維持原本的連結行為。
+
+全站共用的圖片（頭像、OG 圖）才放 `static/images/`，用 `/images/foo.png` 引用。
+
+### 照片發佈前的處理
+
+手機照片直接放上去有三個問題：EXIF 帶著機型與拍攝時間、單張 3–5 MB、
+可能拍到別人的臉或螢幕上的機敏資訊。建議的處理方式（需要 Pillow）：
+
+```bash
+python - <<'PY'
+from PIL import Image
+import os, glob
+os.makedirs('processed', exist_ok=True)
+for f in sorted(glob.glob('*.jpg')):
+    im = Image.open(f).convert('RGB')      # convert 會丟掉 EXIF
+    im.thumbnail((1600, 1600), Image.LANCZOS)
+    im = im.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.NONE).convert('RGB')
+    im.save(os.path.join('processed', f), 'JPEG', quality=86, optimize=True, progressive=True)
+PY
+```
+
+要遮蔽局部（螢幕、識別證、車牌）時，**高斯模糊之後再像素化一次**，
+單純模糊有機會被還原：
+
+```python
+region = im.crop(box)
+region = region.filter(ImageFilter.GaussianBlur(radius=max(region.size)//28))
+small  = region.resize((region.width//48, region.height//48), Image.BILINEAR)
+im.paste(small.resize(region.size, Image.NEAREST), box)
+```
+
+驗證 EXIF 真的清掉了，除了用 API 檢查，也直接搜位元組：
+
+```bash
+grep -c "Xiaomi" processed/*.jpg   # 應該全部是 0
+```
 
 ### 程式碼
 
@@ -275,6 +343,7 @@ hugo-coder 沒有目錄功能，這裡自己補了 `layouts/partials/toc.html`�
 | `_default/single.html` | 統一標題格式 |
 | `404.html` | 找不到頁面時自動試另一個語系 |
 | `robots.txt` | 加上 `Sitemap:` 指向 |
+| `shortcodes/gallery.html` | 新增，多張圖併排 |
 
 升級主題後請檢查 `partials/head.html`，那是整份複製的。
 

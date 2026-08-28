@@ -7,9 +7,9 @@ tags = ["HITCON", "資安研討會", "AI Agent", "LLM", "供應鏈安全", "心�
 categories = ["活動"]
 +++
 
-8 月 21、22 兩天去了 HITCON 2026。這是我第二次參加，也是第二次沒有花到票錢。
+8 月 21、22 兩天去了 [HITCON 2026](https://hitcon.org/2026/zh-TW/)。這是我第二次參加，也是第二次沒有花到票錢。
 
-第一次是靠 AIS3 最佳專題拿到的邀請票，這次則是 HITCON 的學生邀請票。對還在唸書的人來說，這件事的意義不只是省錢——它讓你有機會坐在一群真的在做這件事的人中間，聽他們講今年真的發生了什麼。希望之後還有機會。
+第一次是靠 AIS3 最佳專題拿到的邀請票，這次則是[台灣駭客協會](https://hacker.org.tw/)給的學生邀請票。對還在唸書的人來說，這件事的意義不只是省錢——它讓你有機會坐在一群真的在做這件事的人中間，聽他們講今年真的發生了什麼。
 
 {{< figure src="07-swag-tshirt.jpg" alt="HITCON 2026 紀念衣，上面印著今年的主題標語" caption="今年的主題就印在衣服上：WHEN AI ACTS — HACKING THE AGE OF AGENTIC SYSTEMS" >}}
 
@@ -19,17 +19,21 @@ categories = ["活動"]
 
 第一天出捷運站要搭接駁車時就看到一大群人。還好等了兩批次就坐上專車到中研院，兩天來回都有搭到車，而且都找到位子坐。
 
-{{< figure src="13-venue-street.jpg" alt="中研院園區外的路口" caption="中研院。第一次來，覺得這個場地選得很好" >}}
+{{< figure src="14-venue-bus.jpg" alt="接駁專車" caption="我們搭的專車" >}}
+
+{{< figure src="13-venue-street.jpg" alt="中研院園區外的路口" caption="中研院入口。覺得人文會館這個場地選得真的很好" >}}
 
 場地本身我很喜歡，整體空間佈局不會太擠，議程廳之間移動也順。唯一比較辛苦的是天氣——兩天中午之後都一直在下雨，而吃飯需要到外面。雖然遮蔽物都有，但還是會有強風和細雨飄進來。不過也還好，吃飯半小時就進會場了。
 
 {{< figure src="15-venue-entrance.jpg" alt="會場入口，外牆掛著贊助商與 HITCON 2026 的看板" caption="會場入口" >}}
 
-順帶一提，**食物都非常好吃**。這點必須寫進來。
+順帶一提，**食物都非常好吃**。這點必須寫進來😋。
 
-{{< figure src="16-lunch-day2.jpg" alt="會場的便當" caption="第二天的午餐" >}}
-
-{{< figure src="20-afternoon-tea.jpg" alt="下午茶的鬆餅與飲料" caption="下午茶" >}}
+{{< gallery >}}
+{{< figure src="11-lunch-day1.jpg" alt="第一天的午餐" caption="第一天的午餐" >}}
+{{< figure src="16-lunch-day2.jpg" alt="第二天的便當" caption="第二天的午餐" >}}
+{{< figure src="12-coffee-break.jpg" alt="下午茶的咖啡與點心" caption="下午茶" >}}
+{{< /gallery >}}
 
 ## Day 1
 
@@ -43,7 +47,7 @@ categories = ["活動"]
 
 我自己聽完的感想是：單一研究者對上一家不想修的廠商，本來就沒什麼籌碼，而「時間到就公開」幾乎是唯一有效的施壓手段。
 
-{{< figure src="06-keynote-slide.jpg" alt="議程廳大螢幕上的投影片" caption="議程廳" >}}
+{{< figure src="08-hall-wide.jpg" alt="議程廳與台上的大螢幕" caption="R0 議程廳" >}}
 
 ### Agent2Shell：攻擊落在模型外面
 
@@ -160,27 +164,36 @@ Orange 詳解他在 Pwn2Own Berlin 2026 上用的 Microsoft Edge（Chromium）�
 
 ## 場邊
 
-### NFC badge
+### NFC Battle
 
-今年的 NFC badge 我覺得想法真的很不錯。
+今年的 NFC Battle 我覺得想法真的很不錯。
 
-它等於替換掉了舊式的名片：掃一下就可以存在手機裡，還可以做成 NFC 小卡。整個交換資訊的流程變得非常輕。
+每個人的 Badge 上都有一顆 **NTAG215 晶片**。你拿手機去感應別人的 Badge，就完成一次交換，解鎖對方的專屬卡片——反過來別人感應你的，你的卡也會進到他的圖鑑裡。想更講究一點，還可以自己買小卡、印上想要的圖，一樣拿給別人碰。
 
-{{< figure src="03-nfc-reader.jpg" alt="會場柱子上的 NFC 感應點" caption="會場各處的感應點，把手機靠上去就收集到一張卡" >}}
+它等於把舊式的名片整個換掉：不用交換紙本，碰一下就存進手機。系統還會依收集數量排名，收得多的有機會拿最終大獎。
 
-{{< figure src="09-badge-front.jpg" alt="HITCON 2026 的 NFC 小卡" caption="NFC 小卡" >}}
+不過官方寫得很清楚，這不只是收集遊戲——**「別只交換名片，也來交換卡片吧」**。它本來就是設計來讓你有理由跟陌生人開口的。
 
-{{< figure src="23-nfc-profile.jpg" alt="NFC badge App 裡的個人卡片畫面" caption="App 裡的卡片。順帶一提，這張卡的圖就是我部落格首頁那隻貓" >}}
+{{< gallery cols="2" >}}
+{{< figure src="09-badge-front.jpg" alt="印了自己圖案的 NFC 小卡" caption="自己印的 NFC 小卡" >}}
+{{< figure src="23-nfc-profile.jpg" alt="NFC badge App 裡的個人卡片畫面" caption="App 裡的卡片。這張卡的圖就是我部落格首頁那隻貓" >}}
+{{< /gallery >}}
 
-### 動手區：讓機器吐出一罐飲料
+### 工控挑戰：讓機器倒出一杯飲料
 
-場邊還有可以實際操作的工控區。題目本身不難——**從封包裡看出他們的格式，再用現場提供的腳本把指令發出去，機器就會吐出一罐飲料。**
+場邊有一個模擬的工控環境。完整流程是這樣：用 **Wireshark 觀察 MQTT 通訊**、讀 **PLC 的 Ladder Logic**，找出真正在控制設備的是什麼，然後發送 MQTT 訊息去修改 PLC 變數，讓繼電器動作——最後飲料機就會出水。
+
+實際做起來沒有想像中難。**從封包裡看出他們的格式，再用現場提供的腳本把指令發出去，飲料機就開始出水——像飲水機那樣，我們拿紙杯在下面接。**
 
 但那個回饋很特別。平常做資安大多是看 log、看回應碼、看 flag 有沒有出來，全部都停留在螢幕上。這裡是你送出一個封包，然後**一台實體機器真的動了**。
 
-工控安全一直在講「資訊系統直接影響物理世界」，這件事用一罐掉下來的飲料就講完了。
+工控安全一直在講「資訊系統直接影響物理世界」，這件事用一杯接到的飲料就講完了。日常生活裡的販賣機、飲料機、自動門，本來就都是 PLC、繼電器、感測器在控制。
 
-{{< figure src="18-ics-hardware.jpg" alt="桌上的工控硬體實作套件與筆電" caption="動手區的硬體" >}}
+{{< figure src="17-ics-village.jpg" alt="動手區的桌面，紙箱與筆電" caption="動手區" >}}
+
+{{< figure src="18-ics-hardware.jpg" alt="桌上的工控硬體實作套件與接線" caption="要打的硬體" >}}
+
+{{< figure src="19-ics-mqtt.jpg" alt="筆電終端機上連續送出 MQTT 指令的畫面" caption="把 MQTT 指令送出去" >}}
 
 不過真正讓我記住的是主辦方講的一句話：**這一整套設備架起來要五、六萬台幣。**
 
@@ -200,11 +213,19 @@ Orange 詳解他在 Pwn2Own Berlin 2026 上用的 Microsoft Edge（Chromium）�
 
 ## 一點遺憾
 
-這次唯一比較可惜的是——我太 I 人了，沒有多去參加社群或企業攤位。議程聽得很滿，但場邊的交流幾乎沒有。下次一定要逼自己走過去講幾句話，我相信那會非常好玩。
+這次唯一比較可惜的是——我太 I 人了，沒有多去參加社群或企業攤位。議程聽得很滿，但場邊的交流幾乎沒有。
 
-{{< figure src="22-rain-leaving.jpg" alt="離場時窗外的雨" caption="離場時還在下雨" >}}
+而且錯過的東西還不少：Community & Village 有各社群的 Talks、實作 Lab 和工具展示；焊接體驗可以自己焊一隻 PCB 駭客貓貓；Badge Quest 則要帶著往年的 PCB Badge 去燒新韌體，跟著線索找散在會場各處的基地台，湊齊 QR Code 拼圖。這些都是坐在議程廳裡拿不到的。
+
+現在回頭看，NFC Battle 那句「別只交換名片，也來交換卡片」其實就是在講這件事——它給了你一個開口的理由，而我沒有用上。下次一定要逼自己走過去講幾句話，我相信那會非常好玩。
+
+{{< figure src="22-rain-leaving.jpg" alt="離場時窗外的雨" caption="離場時還在下雨😒" >}}
 
 整體來說，HITCON 2026 真的非常有趣。議程和活動都很紮實，而且不只是聽完就結束——它讓我對很多題目有了更多理解，也發想到更多可以做的方向。身為還在唸書的人，能接觸到這些真實環境裡的議題，是最有價值的部分。
+
+最後要好好謝一次[台灣駭客協會](https://hacker.org.tw/)。兩次來 HITCON 我都沒有花到票錢——對學生來說這不是小事，它把「想去看看」跟「真的去了」之間那道門檻直接拿掉了。
+
+{{< figure src="hit-logo.webp" alt="社團法人台灣駭客協會" link="https://hacker.org.tw/" target="_blank" class="logo" caption="主辦單位：社團法人台灣駭客協會" >}}
 
 希望未來還有機會拿到邀請票。如果有一天能站上去講一場，那就更好了。
 

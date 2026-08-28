@@ -1,7 +1,10 @@
 {{/*
   目錄（Table of Contents）
-  hugo-coder 本身沒有 TOC，這個 partial 補上，並沿用 assets/css/custom.css
-  既有的 #TableOfContents 樣式與 assets/js/custom.js 的捲動高亮。
+  hugo-coder 本身沒有 TOC，這個 partial 補上。
+
+  寬螢幕（≥1280px）由側邊的 rail 導覽取代，這份會被 CSS 隱藏。
+  平板與手機看到的是這一份，預設「收合」——長文的目錄攤開會吃掉整個第一屏，
+  在小螢幕上尤其嚴重（實測 618px，佔掉 76% 的可視高度）。
 
   站台參數：
     params.enableToc      bool  全站開關（預設 false）
@@ -14,8 +17,8 @@
 {{ if isset .Params "toc" }}{{ $on = .Params.toc }}{{ end }}
 {{ $min := .Site.Params.tocMinHeadings | default 3 }}
 {{ if and $on (ge (len .Fragments.Identifiers) $min) }}
-  <aside class="toc" role="doc-toc" aria-labelledby="toc-title">
-    <h2 class="toc-title" id="toc-title">{{ i18n "toc" }}</h2>
+  <details class="toc">
+    <summary class="toc-title">{{ i18n "toc" }}</summary>
     {{ .TableOfContents }}
-  </aside>
+  </details>
 {{ end }}

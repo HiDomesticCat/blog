@@ -1,0 +1,21 @@
+{{/*
+  gallery —— 讓多張圖併排。
+
+    {{< gallery >}}
+      {{< figure src="a.jpg" caption="說明" >}}
+      {{< figure src="b.jpg" caption="說明" >}}
+    {{< /gallery >}}
+
+  參數（都可省略）：
+    cols   固定欄數。不給的話依容器寬度自動決定，窄螢幕一律變單欄。
+    ratio  每一格的長寬比，預設 3 / 4（手機直拍的比例）。
+           橫幅照片可以用 ratio="4 / 3" 或 "16 / 9"。
+
+  格子裡的圖會裁切成一致比例好排版，但點開 lightbox 看到的仍是完整原圖。
+*/}}
+{{- $style := "" -}}
+{{- with .Get "cols" }}{{ $style = printf "%s--gallery-cols:%s;" $style . }}{{ end -}}
+{{- with .Get "ratio" }}{{ $style = printf "%s--gallery-ratio:%s;" $style . }}{{ end -}}
+<div class="gallery"{{ with $style }} style="{{ . | safeCSS }}"{{ end }}>
+{{ .Inner }}
+</div>

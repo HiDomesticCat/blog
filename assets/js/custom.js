@@ -72,6 +72,78 @@
       });
     });
 
+    // ===== 點圖放大（lightbox）=====
+    // 包在連結裡的圖（例如單位 logo）維持原本的連結行為，不攔截。
+    var zoomable = Array.prototype.filter.call(
+      document.querySelectorAll('.post-content img, .container.page article img'),
+      function (img) { return !img.closest('a'); }
+    );
+
+    if (zoomable.length) {
+      var overlay = null;
+      var lastFocused = null;
+
+      var closeLightbox = function () {
+        if (!overlay || overlay.hidden) return;
+        overlay.hidden = true;
+        overlay.querySelector('.lightbox-img').removeAttribute('src');
+        document.body.style.overflow = '';
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
+      };
+
+      var buildOverlay = function () {
+        overlay = document.createElement('div');
+        overlay.className = 'lightbox';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.hidden = true;
+
+        var btn = document.createElement('button');
+        btn.className = 'lightbox-close';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', '關閉');
+        btn.textContent = '×';
+
+        var big = document.createElement('img');
+        big.className = 'lightbox-img';
+        big.alt = '';
+
+        overlay.appendChild(btn);
+        overlay.appendChild(big);
+        document.body.appendChild(overlay);
+
+        // 點背景或叉叉都關閉；點圖片本身也關（游標是 zoom-out）
+        overlay.addEventListener('click', closeLightbox);
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' || e.key === 'Esc') closeLightbox();
+        });
+      };
+
+      var openLightbox = function (img) {
+        if (!overlay) buildOverlay();
+        lastFocused = document.activeElement;
+        var big = overlay.querySelector('.lightbox-img');
+        big.src = img.currentSrc || img.src;
+        big.alt = img.alt || '';
+        overlay.hidden = false;
+        document.body.style.overflow = 'hidden';
+        overlay.querySelector('.lightbox-close').focus();
+      };
+
+      zoomable.forEach(function (img) {
+        img.classList.add('zoomable');
+        img.setAttribute('role', 'button');
+        img.setAttribute('tabindex', '0');
+        img.addEventListener('click', function () { openLightbox(img); });
+        img.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openLightbox(img);
+          }
+        });
+      });
+    }
+
     // ===== External links open in new tab =====
     document.querySelectorAll('a[href^="http"]').forEach(function (link) {
       if (!link.href.includes(window.location.hostname)) {
@@ -89,22 +161,75 @@
       });
     }
 
-    // ===== TOC active heading highlight =====
+    // ===== 側邊章節導覽（rail）+ 目前位置高亮 =====
+    // 平常只顯示幾條短線靠在畫面左緣，滑過去才展開文字標籤。
+    // 目前讀到的那一節會標成強調色。寬螢幕才出現，窄螢幕沿用內文裡的目錄。
     var tocLinks = document.querySelectorAll('#TableOfContents a');
-    var headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
+    var headings = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+    var railLinks = [];
 
-    if (tocLinks.length > 0 && headings.length > 0) {
-      window.addEventListener('scroll', function () {
-        var current = '';
-        headings.forEach(function (h) {
-          if (h.getBoundingClientRect().top <= 120) {
-            current = h.id;
-          }
-        });
-        tocLinks.forEach(function (link) {
-          link.classList.toggle('active', link.getAttribute('href') === '#' + current);
-        });
+    if (headings.length >= 3) {
+      var rail = document.createElement('nav');
+      rail.className = 'toc-rail';
+      rail.setAttribute('aria-label', '章節導覽');
+
+      var railList = document.createElement('ul');
+      Array.prototype.forEach.call(headings, function (h) {
+        var li = document.createElement('li');
+        li.className = 'toc-rail-' + h.tagName.toLowerCase();
+
+        var a = document.createElement('a');
+        a.href = '#' + h.id;
+
+        var dash = document.createElement('span');
+        dash.className = 'toc-rail-dash';
+        dash.setAttribute('aria-hidden', 'true');
+
+        var label = document.createElement('span');
+        label.className = 'toc-rail-label';
+        // 標題裡含有主題插入的「Link to heading」錨點，取第一個文字節點就好
+        label.textContent = (h.childNodes[0] && h.childNodes[0].textContent || h.textContent).trim();
+
+        a.appendChild(dash);
+        a.appendChild(label);
+        li.appendChild(a);
+        railList.appendChild(li);
+        railLinks.push(a);
       });
+      rail.appendChild(railList);
+      document.body.appendChild(rail);
+
+      // 展開／收合改用 class 驅動，不單靠 :hover。
+      // 理由：觸控裝置沒有 hover，而且純 CSS 偽類在某些情況下不好驗證。
+      var openRail = function () { rail.classList.add('is-open'); };
+      var closeRail = function () { rail.classList.remove('is-open'); };
+      rail.addEventListener('mouseenter', openRail);
+      rail.addEventListener('mouseleave', closeRail);
+      rail.addEventListener('focusin', openRail);
+      rail.addEventListener('focusout', function (e) {
+        if (!rail.contains(e.relatedTarget)) closeRail();
+      });
+      // 觸控：點一下先展開，再點連結才跳轉
+      rail.addEventListener('touchstart', openRail, { passive: true });
+    }
+
+    if ((tocLinks.length || railLinks.length) && headings.length) {
+      var syncActive = function () {
+        var current = '';
+        Array.prototype.forEach.call(headings, function (h) {
+          if (h.getBoundingClientRect().top <= 120) current = h.id;
+        });
+        // 還沒捲到第一個標題時，highlight 第一節
+        if (!current && headings.length) current = headings[0].id;
+
+        var mark = function (link) {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+        };
+        Array.prototype.forEach.call(tocLinks, mark);
+        railLinks.forEach(mark);
+      };
+      window.addEventListener('scroll', syncActive, { passive: true });
+      syncActive();
     }
 
     // ===== Smooth scroll for anchor links =====
