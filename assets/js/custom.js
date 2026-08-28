@@ -566,23 +566,10 @@
           entry.el = scrollWrap;   // 放大時搬捲動容器，位置才好還原
         }
 
-        // 圖可以點整塊放大；程式碼與表格只認按鈕（那裡點擊要留給選字）。
-        // 但圖裡的文字也要能選 —— 所以「按下到放開有明顯位移」或
-        // 「這次操作產生了選取範圍」都不算點擊，不開啟放大。
-        if (entry.kind === 'diagram') {
-          entry.el.classList.add('is-clickable');
-          var px = 0, py = 0;
-          entry.el.addEventListener('pointerdown', function (e) { px = e.clientX; py = e.clientY; });
-          entry.el.addEventListener('click', function (e) {
-            if (isOpen) return;
-            if (this.closest('.zoomview')) return;
-            if (e.target.closest('a, button')) return;
-            if (Math.abs(e.clientX - px) > 3 || Math.abs(e.clientY - py) > 3) return;
-            var sel = window.getSelection();
-            if (sel && !sel.isCollapsed && sel.toString().trim()) return;
-            open(entry);
-          });
-        }
+        // 只有按鈕會開啟放大。
+        // 之前圖是「點整塊都能放大」，但那會跟選字打架 —— 在圖上拖曳選標籤，
+        // 一放開就被當成點擊而開啟覆蓋層。加位移門檻只是把問題變得比較難遇到，
+        // 不如乾脆讓觸發點單一：按鈕負責放大，其他一切留給選取與複製。
       });
     })();
 

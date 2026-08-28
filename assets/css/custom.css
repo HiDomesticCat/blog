@@ -1264,18 +1264,12 @@ pre, code, kbd, samp {
 
 /* 複製按鈕：疊在區塊右上角。因為掛在不捲動的 .highlight 上，
    長程式碼橫向捲動時它會留在原位。 */
+/* 複製與放大兩顆按鈕一律常駐，樣式也保持一致。
+   淡入式的按鈕在觸控裝置上叫不出來，而且看不到就等於不存在。 */
 .post .post-content .copy-code-button,
 .container.page article .copy-code-button {
   z-index: 2;
-  opacity: 0.55;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-
-.post .post-content .highlight:hover .copy-code-button,
-.post .post-content .copy-code-button:focus-visible,
-.container.page article .highlight:hover .copy-code-button,
-.container.page article .copy-code-button:focus-visible {
-  opacity: 1;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 /* 程式碼區塊的橫向捲軸要看得見 —— 沒有捲軸的話，讀者不會知道右邊還有內容，
@@ -1356,12 +1350,6 @@ pre, code, kbd, samp {
   position: relative;
 }
 
-/* 圖可以直接點整塊放大（圖沒有選字需求）；程式碼與表格只認按鈕 */
-.post .post-content .diagram-canvas.is-clickable,
-.container.page article .diagram-canvas.is-clickable {
-  cursor: zoom-in;
-}
-
 /* 按鈕的定位基準是不捲動的外層（見 custom.js 的說明），
    放在捲動容器裡的話橫向拉動時按鈕會跟著飄走。 */
 .post .post-content .zoom-host,
@@ -1375,11 +1363,14 @@ pre, code, kbd, samp {
   overflow-x: auto;
 }
 
+/* 按鈕放在區塊「上方」預留的一條帶狀空間裡，不疊在內容上。
+   跟複製按鈕一樣常駐顯示 —— 淡入式的按鈕在觸控裝置上根本叫不出來，
+   而且看不到就等於不存在。 */
 .post .post-content .zoom-button,
 .container.page article .zoom-button {
   position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
+  top: 0;
+  right: 0;
   z-index: 3;
   display: inline-flex;
   align-items: center;
@@ -1389,11 +1380,21 @@ pre, code, kbd, samp {
   padding: 0;
   border-radius: 6px;
   border: 1px solid var(--custom-border-color);
-  background: color-mix(in srgb, var(--custom-bg-card) 88%, transparent);
+  background: transparent;
   color: var(--custom-text-muted);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+/* 帶狀空間：內容從按鈕底下開始，兩者不會重疊。
+   （程式碼區塊本來就有這條，見「程式碼區塊的外框」那一段。） */
+.post .post-content .zoom-host > .diagram-canvas,
+.post .post-content .zoom-host > .table-scroll,
+.post .post-content .zoom-host > .katex-display,
+.container.page article .zoom-host > .diagram-canvas,
+.container.page article .zoom-host > .table-scroll,
+.container.page article .zoom-host > .katex-display {
+  padding-top: 3.4rem;
 }
 
 /* 程式碼區塊右上角已有複製按鈕，放大鈕往左讓位 */
@@ -1402,23 +1403,7 @@ pre, code, kbd, samp {
   top: 0.9rem;
   right: 6.6rem;
   border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
   color: #bbb;
-}
-
-/* 平常淡出，滑過或鍵盤聚焦才出現；觸控裝置沒有 hover，維持半透明常駐 */
-.post .post-content .has-zoom:hover .zoom-button,
-.post .post-content .zoom-button:focus-visible,
-.container.page article .has-zoom:hover .zoom-button,
-.container.page article .zoom-button:focus-visible {
-  opacity: 1;
-}
-
-@media (hover: none) {
-  .post .post-content .zoom-button,
-  .container.page article .zoom-button {
-    opacity: 0.6;
-  }
 }
 
 .post .post-content .zoom-button:hover,
@@ -1575,8 +1560,11 @@ pre, code, kbd, samp {
 }
 
 /* 圖在覆蓋層裡不該再顯示「可點擊放大」的游標 */
-.zoomview .diagram-canvas.is-clickable {
-  cursor: inherit;
+/* 覆蓋層裡沒有按鈕，也就不需要預留給它的帶狀空間 */
+.zoomview .diagram-canvas,
+.zoomview .table-scroll,
+.zoomview .katex-display {
+  padding-top: 0;
 }
 
 @media (max-width: 768px) {
