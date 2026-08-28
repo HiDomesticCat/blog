@@ -270,9 +270,9 @@
       var zh = document.documentElement.lang.indexOf('zh') === 0;
       var T = zh
         ? { open: '放大檢視', close: '關閉（Esc）', zin: '放大', zout: '縮小',
-            fit: '符合畫面', actual: '原尺寸', hint: '拖曳平移 · Ctrl＋滾輪縮放 · Esc 關閉' }
+            fit: '符合畫面', actual: '原尺寸' }
         : { open: 'Enlarge', close: 'Close (Esc)', zin: 'Zoom in', zout: 'Zoom out',
-            fit: 'Fit', actual: 'Actual size', hint: 'Drag to pan · Ctrl+wheel to zoom · Esc to close' };
+            fit: 'Fit', actual: 'Actual size' };
 
       var groups = [
         { sel: '.diagram-canvas', kind: 'diagram' },
@@ -334,12 +334,7 @@
         tools.appendChild(levelEl);
         tools.appendChild(mk('in', '+', T.zin));
 
-        var hint = document.createElement('span');
-        hint.className = 'zoomview-hint';
-        hint.textContent = T.hint;
-
         bar.appendChild(titleEl);
-        bar.appendChild(hint);
         bar.appendChild(tools);
         bar.appendChild(mk('close', '×', T.close, 'zoomview-close'));
 

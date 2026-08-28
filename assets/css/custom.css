@@ -1474,15 +1474,10 @@ pre, code, kbd, samp {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 40%;
+  max-width: 55%;
+  margin-right: auto;
 }
 
-.zoomview-hint {
-  font-size: 1.3rem;
-  color: var(--custom-text-muted);
-  margin-right: auto;
-  white-space: nowrap;
-}
 
 /* 縮放控制做成一組相連的分段控制，視覺上是一個整體 */
 .zoomview-tools {
@@ -1545,9 +1540,12 @@ pre, code, kbd, samp {
   overflow: auto;
   padding: 2rem;
   cursor: grab;
-  /* 內容比畫面小時置中，看起來比黏在左上角自然 */
-  display: grid;
-  place-content: center;
+  /* ⚠ 這裡不能用 flex/grid 的置中（place-content: center 之類）。
+     內容比容器寬時，溢出到「起始邊」的那一段會被裁掉而且捲不到 ——
+     實測圖的左半邊直接拉不出來。
+     改用區塊排版 + sizer 的 margin: 0 auto：內容較窄時照樣置中，
+     較寬時 auto 邊界會算成 0，兩邊都捲得到。 */
+  display: block;
 }
 
 .zoomview-scroll.is-dragging {
@@ -1558,6 +1556,7 @@ pre, code, kbd, samp {
 /* sizer 撐出「縮放後」的尺寸讓捲動範圍正確；stage 才是實際被 scale 的元素 */
 .zoomview-sizer {
   position: relative;
+  margin: 0 auto;
 }
 
 .zoomview-stage {
@@ -1594,9 +1593,7 @@ pre, code, kbd, samp {
 }
 
 @media (max-width: 768px) {
-  /* 手機的工具列塞不下提示文字，先讓位給控制項 */
-  .zoomview-hint { display: none; }
-  .zoomview-title { max-width: 50%; margin-right: auto; }
+  .zoomview-title { max-width: 60%; }
   .zoomview-bar { gap: 1rem; padding: 0.8rem 1rem; }
   .zoomview-scroll { padding: 1rem; }
 }
