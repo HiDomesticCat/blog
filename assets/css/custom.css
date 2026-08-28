@@ -1733,13 +1733,16 @@ pre, code, kbd, samp {
   width: calc(var(--d2-w, 100%) * var(--ui-scale));
 }
 
-/* 手機一律單欄，即使文章寫了 cols="2"。
-   兩張照片並排在 320px 上每張只剩 152px，細節根本看不到；
-   全寬單欄好看得多，而且左右邊距會跟其他圖一致
-   （並排時右邊那張會貼著版面右緣，跟左邊那張看起來不對稱）。 */
+/* 窄螢幕上把文章寫死的欄數改成「放得下幾欄就幾欄」。
+   不是一律單欄 —— 而是保證每一格至少 16rem，寬度夠就並排、不夠才收成一欄：
+     320px 容器 → 2 欄需要 16+16+間距 = 33.6rem，放不下 → 1 欄（全寬 320）
+     375px 手機 → 容器 335，仍放不下 → 1 欄
+     414px 手機 → 容器 374，2 欄各 179 → 並排
+   min(16rem, 100%) 是防呆：容器比 16rem 還窄時不會反而撐破版面。
+   這樣不管幾欄，左右都留得住跟內文一致的邊距。 */
 @media (max-width: 600px) {
   .post .post-content .gallery,
   .container.page article .gallery {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
   }
 }
