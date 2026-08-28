@@ -1,0 +1,208 @@
+{{- /* =============================================================
+     覆寫主題的 baseof.html。相對於 themes/hugo-coder/layouts/_default/baseof.html
+     只改了兩個地方，其餘逐行照抄（升級主題時請以原檔為基準重做這兩處）：
+
+       1. <head> 裡有條件地載入本地 KaTeX 樣式表
+          數學式是建置期就渲染好的（layouts/_default/_markup/render-passthrough.html），
+          但 HTML 那份輸出仍需要 katex.min.css 與 woff2 字型才有正確排版。
+          放在 <head> 而不是主題原本的 body 尾端，才不會先閃一下未套樣式的原始碼。
+
+       2. mermaid 從「CDN 的 9.3.0」換成「本專案內的 11.6.0」並支援主題切換
+          原本那段是 cdn.jsdelivr.net 的 9.3.0，且 initialize 沒帶 theme，
+          深色模式下圖是白底黑字，跟頁面完全不搭。
+     ============================================================= */ -}}
+{{- /* 先取一次 .Content 觸發內容渲染，才能得知這頁有沒有數學式。
+       建置期渲染的式子會帶 class="katex"，用它判斷比要求每篇都寫
+       math = true 可靠，也不會忘記。Hugo 會快取 .Content，不會重算。 */ -}}
+{{- $hasMath := and .Content (strings.Contains .Content "katex") -}}
+<!DOCTYPE html>
+{{- /* 用 LanguageCode（zh-Hant / en）而不是 Lang（zh / en）。
+       漢字統一碼下，瀏覽器要靠 lang 才知道該挑正體還是簡體/日文字形；
+       只寫 "zh" 多數瀏覽器會當成簡體。 */ -}}
+<html lang="{{ .Site.Language.LanguageCode | default .Site.Language.Lang }}">
+
+<head>
+  <title>{{ block "title" . }}{{ .Site.Params.HeadTitle | default .Site.Title }}{{ end }}</title>
+  {{ partial "head.html" . }}
+  {{- if $hasMath }}
+  {{- $katex := resources.Get "katex/katex.min.css" | fingerprint }}
+  {{- /* 字型放在 static/katex/fonts/，katex.min.css 內是相對路徑 fonts/…，
+         指紋化後樣式表仍發佈在 /katex/ 底下，所以相對路徑剛好對得上。
+         只放 woff2：CSS 的 src 清單裡 woff2 排第一，瀏覽器不會去要 woff/ttf。 */ -}}
+  <link rel="stylesheet" href="{{ $katex.RelPermalink }}" integrity="{{ $katex.Data.Integrity }}">
+  {{- end }}
+</head>
+
+{{ $csClass := "colorscheme-light" }}
+{{ if eq .Site.Params.colorScheme "dark" }}
+{{ $csClass = "colorscheme-dark" }}
+{{ else if eq .Site.Params.colorScheme "auto" }}
+{{ $csClass = "colorscheme-auto" }}
+{{ end }}
+
+<body class="preload-transitions {{ $csClass }}{{ if .Site.Params.rtl }} rtl{{ end }}">
+  {{ partial "float" . }}
+  <main class="wrapper">
+    {{ partial "header.html" . }}
+
+    <div class="content">
+      {{ block "content" . }}{{ end }}
+    </div>
+
+    {{ partial "footer.html" . }}
+  </main>
+
+  {{ if .HasShortcode "mermaid" }}
+  {{- /* 本地 mermaid 11.6.0（MIT），取代主題原本 cdn.jsdelivr.net 的 9.3.0。
+         放 static/ 不走 Hugo 資產管線：檔案已經 minify 過，再跑一次只是浪費建置時間；
+         版號寫在檔名裡當作快取破除。只有真的用到 mermaid 的頁面才會載入這 2.5 MB。
+
+         主要修的是主題原本 `mermaid.initialize({ startOnLoad: true })` 的兩個問題：
+           1. 沒帶 theme → 深色模式下圖是白底黑字，跟頁面完全不搭
+           2. startOnLoad 只跑一次 → 使用者切換淺／深色時圖不會跟著換
+         下面改成自己控制時機，並在主題變動時用留存的原始碼重繪。 */ -}}
+  <script>
+    (function () {
+      var srcs = new WeakMap();
+      function pick() {
+        var c = document.body.className;
+        if (c.indexOf('colorscheme-dark') > -1) return 'dark';
+        if (c.indexOf('colorscheme-light') > -1) return 'neutral';
+        return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'neutral';
+      }
+      var last = null;
+      function draw() {
+        if (!window.mermaid) return;
+        var nodes = [].slice.call(document.querySelectorAll('.mermaid'));
+        if (!nodes.length) return;
+        var theme = pick();
+        if (theme === last) return;
+        last = theme;
+        nodes.forEach(function (n) {
+          // mermaid 會把元素內容換成 SVG，所以第一次先把原始碼留起來，
+          // 之後每次重繪都從留存的原始碼開始，否則第二次會拿 SVG 當輸入。
+          if (!srcs.has(n)) srcs.set(n, n.textContent);
+          n.textContent = srcs.get(n);
+          n.removeAttribute('data-processed');
+        });
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: theme,
+          securityLevel: 'strict',
+          fontFamily: getComputedStyle(document.body).fontFamily
+        });
+        window.mermaid.run({ nodes: nodes });
+      }
+      window.__initMermaid = draw;
+      // 主題切換是改 body 的 class，用 MutationObserver 接；
+      // colorscheme-auto 時還要跟著系統設定變動。
+      new MutationObserver(draw).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+    })();
+  </script>
+  <script src="{{ "js/mermaid-11.6.0.min.js" | relURL }}" defer
+          onload="window.__initMermaid()"></script>
+  {{ end }}
+
+  {{ if .Site.Params.disableDefaultJsScripts }}
+  {{ if not .Site.Params.hideColorSchemeToggle }}
+  {{ errorf "Invalid configuration. Default JS scripts are disabled, but 'hideColorSchemeToggle' is false." }}
+  {{end}}
+  {{ else if hugo.IsServer }}
+  {{ $script := resources.Get "js/coder.js" }}
+  <script src="{{ $script.RelPermalink }}"></script>
+  {{ else }}
+  {{ $script := resources.Get "js/coder.js" | minify | fingerprint }}
+  <script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
+  {{ end }}
+
+  {{ range .Site.Params.customJS }}
+  {{ if hugo.IsServer }}
+  {{ $script := resources.Get . }}
+  <script src="{{ $script.RelPermalink }}"></script>
+  {{ else }}
+  {{ $script := resources.Get . | minify | fingerprint }}
+  <script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
+  {{ end }}
+  {{ end }}
+
+  {{ range .Site.Params.customRemoteJS }}
+  {{ if hugo.IsServer }}
+  {{ $script := resources.GetRemote . }}
+  <script src="{{ $script.RelPermalink }}"></script>
+  {{ else }}
+  {{ $script := resources.GetRemote . | minify | fingerprint }}
+  <script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
+  {{ end }}
+  {{ end }}
+
+
+  {{ template "_internal/google_analytics.html" . }}
+
+  {{ if and .Site.Params.fathomAnalytics .Site.Params.fathomAnalytics.siteID }}
+  {{- partial "analytics/fathom" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.plausibleAnalytics .Site.Params.plausibleAnalytics.domain }}
+  {{- partial "analytics/plausible" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.goatCounter .Site.Params.goatCounter.code }}
+  {{- partial "analytics/goatcounter" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.cloudflare .Site.Params.cloudflare.token }}
+  {{- partial "analytics/cloudflare" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.baidu .Site.Params.baidu.token }}
+  {{- partial "analytics/baidu" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.wideAngleAnalytics .Site.Params.wideAngleAnalytics.siteID }}
+  {{- partial "analytics/wideangle" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.matomo .Site.Params.matomo.serverURL }}
+  {{- partial "analytics/matomo" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.googleTagManager .Site.Params.googleTagManager.id }}
+  {{- partial "analytics/googletagmanager" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.applicationInsights .Site.Params.applicationInsights.connectionString }}
+  {{- partial "analytics/applicationinsights" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.microAnalytics .Site.Params.microAnalytics.id }}
+  {{- partial "analytics/microanalyticsio" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.onedollarstats .Site.Params.onedollarstats.id }}
+  {{- partial "analytics/onedollarstats" . -}}
+  {{ end }}
+
+  {{ if .Site.Params.vercelAnalytics}}
+  {{- partial "analytics/vercel" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.yandexMetrika .Site.Params.yandexMetrika.id }}
+  {{- partial "analytics/yandex-metrika" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.umami .Site.Params.umami.siteID }}
+  {{- partial "analytics/umami" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.pirsch .Site.Params.pirsch.code }}
+  {{- partial "analytics/pirsch" . -}}
+  {{ end }}
+
+  {{ if and .Site.Params.clicky .Site.Params.clicky.id }}
+  {{- partial "analytics/clicky" . -}}
+  {{ end }}
+
+  {{- partial "body/extensions" . -}}
+</body>
+</html>
