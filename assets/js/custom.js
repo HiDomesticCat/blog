@@ -406,9 +406,14 @@
         var dragging = false, sx = 0, sy = 0, sl = 0, st = 0;
         scroller.addEventListener('pointerdown', function (e) {
           if (e.button !== 0 || e.target.closest('a, button')) return;
-          // 在文字上按下 → 讓瀏覽器做選取，不要攔成平移。
-          // 圖的空白處、背景才用來拖曳平移；內容太大時也還有滾輪與捲軸。
-          if (e.target.closest('text, tspan, foreignObject, code, pre, td, th, .katex')) return;
+          // 在「文字」上按下 → 讓瀏覽器做選取，不要攔成平移。
+          // ⚠ 這個清單一定要精準。第一版寫了 `pre`，而 mermaid 的 SVG 整個
+          //   包在 <pre class="mermaid"> 裡 —— 等於整張圖都被當成文字區，
+          //   在圖上完全拖不動，只有圖外的背景拖得動。
+          //   現在只認 SVG 的文字節點，以及程式碼／表格／算式這些真的以文字為主的區塊；
+          //   圖形本身（rect、path、line、g）可以拖曳平移。
+          if (e.target.closest('text, tspan, foreignObject')) return;
+          if (e.target.closest('.highlight, .table-scroll, .katex')) return;
           dragging = true; dragMoved = false;
           sx = e.clientX; sy = e.clientY;
           sl = scroller.scrollLeft; st = scroller.scrollTop;
@@ -459,6 +464,10 @@
       function setScale(k) {
         scale = clamp(k);
         stage.style.transform = 'scale(' + scale + ')';
+        // 舞台要有「明確」寬度，不能只靠 max-content。
+        // mermaid 的 SVG 只有 max-width 沒有固定寬度，放進寬度不定的容器會塌成最小寬
+        // （實測 1075px 的甘特圖在舞台裡只佔 300px，縮放倍率算對了圖還是小小一塊）。
+        stage.style.width = natural.w + 'px';
         sizer.style.width = (natural.w * scale) + 'px';
         sizer.style.height = (natural.h * scale) + 'px';
         levelEl.textContent = Math.round(scale * 100) + '%';
@@ -482,6 +491,14 @@
         // 標題要在搬移「之前」取：搬進舞台之後元素就不在 <figure> 裡了，
         // closest('figure') 會找不到，圖說就變成通用的「圖表」。
         var title = labelFor(entry);
+        // ⚠ 原尺寸要在「搬移之前」量。
+        //   D2 的 SVG 有 width/height 屬性，搬到哪裡都撐得開；
+        //   但 mermaid 的 SVG 只有 viewBox 與 style，放進會收縮的容器就塌成最小寬度
+        //   （實測搬進舞台後只剩 320px，而它其實有 1075px）——
+        //   fit 便算出誇張的倍率，甘特圖一開就是 300%。
+        //   元素還在原位時的 scrollWidth 已經包含溢出的部分，正是我們要的原尺寸。
+        var natW = Math.max(entry.el.scrollWidth, Math.round(entry.el.getBoundingClientRect().width), 1);
+        var natH = Math.max(entry.el.scrollHeight, Math.round(entry.el.getBoundingClientRect().height), 1);
         current = entry.el;
         placeholder = document.createComment('zoomview');
         current.parentNode.insertBefore(placeholder, current);
@@ -494,9 +511,9 @@
         overlay.hidden = false;
         document.body.style.overflow = 'hidden';
 
-        // 原尺寸要在沒有 transform、且覆蓋層已顯示的狀態下量
-        natural.w = Math.max(stage.scrollWidth, current.scrollWidth || 0, 1);
-        natural.h = Math.max(stage.scrollHeight, current.scrollHeight || 0, 1);
+        // 用搬移前量到的尺寸；舞台量到的值只拿來當保底
+        natural.w = Math.max(natW, stage.scrollWidth || 0, 1);
+        natural.h = Math.max(natH, stage.scrollHeight || 0, 1);
 
         setScale(entry.kind === 'diagram' ? Math.max(1, Math.min(3, fitScale())) : 1);
 

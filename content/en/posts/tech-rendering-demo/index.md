@@ -9,7 +9,7 @@ tags = ["writing", "tooling"]
 +++
 
 A reference page listing every component I can use in a technical post, and the
-limits I have actually run into. Everything below is really rendered.
+limits I have actually run into[^1]. Everything below is really rendered.
 It is `draft = true`, so it never gets published.
 
 ## Mathematics
@@ -356,8 +356,11 @@ is a self-hosted JetBrains Mono.
 | Mermaid | mermaid shortcode | in the browser |
 | Code | fenced block | at build time |
 
-Footnotes work[^1], and so do block quotes:
+Block quotes:
 
 > What goes unobserved disappears quietly.
 
-[^1]: Footnotes collect at the end with a link back to where they were cited.
+[^1]: Footnotes collect at the end. The reference is deliberately near the top
+    of the page — with the two close together the view barely moves and you
+    cannot tell whether the jump happened. The target flashes briefly on
+    arrival, and so does the reference when you jump back.
