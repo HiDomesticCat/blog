@@ -1327,3 +1327,276 @@ pre, code, kbd, samp {
 .container.page article .chroma .lntd:last-child {
   width: 99%;
 }
+
+/* =============================================================================
+   內容放大檢視（assets/js/custom.js 的「內容放大檢視」段落）
+   -----------------------------------------------------------------------------
+   圖、程式碼、表格、公式常常比 860px 的內文欄寬。橫向捲動在手機上很難讀，
+   所以每一塊都給一個「放大」按鈕，整塊搬到全螢幕覆蓋層裡看。
+   ============================================================================= */
+
+.post .post-content .has-zoom,
+.container.page article .has-zoom {
+  position: relative;
+}
+
+/* 圖可以直接點整塊放大（圖沒有選字需求）；程式碼與表格只認按鈕 */
+.post .post-content .diagram-canvas.is-clickable,
+.container.page article .diagram-canvas.is-clickable {
+  cursor: zoom-in;
+}
+
+.post .post-content .zoom-button,
+.container.page article .zoom-button {
+  position: absolute;
+  top: 0.9rem;
+  right: 1.2rem;
+  z-index: 3;
+  width: 3rem;
+  height: 2.8rem;
+  padding: 0;
+  line-height: 1;
+  font-size: 1.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--custom-border-color);
+  background: var(--custom-bg-card);
+  color: var(--custom-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* 程式碼區塊右上角已經有複製按鈕，放大鈕往左讓位 */
+.post .post-content .highlight > .zoom-button,
+.container.page article .highlight > .zoom-button {
+  right: 6.6rem;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+
+/* 平常淡出，滑過或鍵盤聚焦才顯示；觸控裝置沒有 hover，一律顯示 */
+.post .post-content .has-zoom:hover .zoom-button,
+.post .post-content .zoom-button:focus-visible,
+.container.page article .has-zoom:hover .zoom-button,
+.container.page article .zoom-button:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .post .post-content .zoom-button,
+  .container.page article .zoom-button {
+    opacity: 0.75;
+  }
+}
+
+.post .post-content .zoom-button:hover,
+.container.page article .zoom-button:hover {
+  color: var(--custom-primary);
+  border-color: var(--custom-primary);
+}
+
+/* 表格本身沒有定位容器，JS 會包一層 .table-wrap */
+.post .post-content .table-wrap,
+.container.page article .table-wrap {
+  position: relative;
+  overflow-x: auto;
+}
+
+/* 手機：圖改成「縮到剛好、不橫向捲」。
+   桌機維持原尺寸（字級 18px＝內文），只有很寬的圖才捲；
+   但在 360px 的螢幕上，原尺寸等於幾乎每張圖都要左右拉好幾個畫面。
+   有了放大檢視之後，內嵌那份的角色就變成「看得出是什麼」，
+   真要讀細節就點開 —— 放大檢視裡可以自由縮放與平移，比橫向捲好用。 */
+@media (max-width: 768px) {
+  .post .post-content .diagram--d2 .diagram-canvas > svg,
+  .container.page article .diagram--d2 .diagram-canvas > svg {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* mermaid 甘特圖：標籤放不進工作條時，mermaid 會把它挪到條外
+   （taskTextOutsideRight/Left）—— 那裡有格線，字疊上去很難讀。
+   條的寬度是由「工期 ÷ 圖表總寬」決定的，所以只要任務夠短、標籤夠長，
+   再怎麼調字級都一定會有挪出去的情況；與其跟它拉鋸，不如讓挪出去的
+   標籤本身讀得清楚：用 paint-order + 同底色描邊做出一圈底光，
+   文字就會浮在格線之上。 */
+.post .post-content .diagram--mermaid svg text.taskTextOutsideRight,
+.post .post-content .diagram--mermaid svg text.taskTextOutsideLeft,
+.container.page article .diagram--mermaid svg text.taskTextOutsideRight,
+.container.page article .diagram--mermaid svg text.taskTextOutsideLeft {
+  paint-order: stroke;
+  stroke: var(--custom-bg-subtle);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* 格線本身也調淡一點，讓工作條與文字更突出 */
+.post .post-content .diagram--mermaid svg .grid .tick line,
+.container.page article .diagram--mermaid svg .grid .tick line {
+  opacity: 0.35;
+}
+
+/* ----- 放大檢視的全螢幕覆蓋層 -----
+   工具列排版：左邊是這張圖／這段程式碼的說明（取 figcaption），
+   中間是操作提示，右邊是縮放控制與關閉。
+   顏色一律走站上的 token，跟頁面其他元件同一套。 */
+.zoomview {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  flex-direction: column;
+  background: var(--custom-bg-subtle);
+}
+
+/* display:flex 會蓋掉 hidden 屬性，必須明確關掉 */
+.zoomview[hidden] {
+  display: none;
+}
+
+.zoomview-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1rem 1.6rem;
+  border-bottom: 1px solid var(--custom-border-color);
+  background: var(--custom-bg-card);
+  flex: 0 0 auto;
+}
+
+.zoomview-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+}
+
+.zoomview-hint {
+  font-size: 1.3rem;
+  color: var(--custom-text-muted);
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+/* 縮放控制做成一組相連的分段控制，視覺上是一個整體 */
+.zoomview-tools {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--custom-border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.zoomview-tools button {
+  min-width: 3.8rem;
+  height: 3.4rem;
+  padding: 0 1rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.zoomview-tools button + button {
+  border-left: 1px solid var(--custom-border-color);
+}
+
+.zoomview-tools button:hover {
+  background: var(--custom-bg-raised);
+  color: var(--custom-primary);
+}
+
+.zoomview-level {
+  min-width: 6.4rem;
+  font-size: 1.4rem !important;
+  font-variant-numeric: tabular-nums;
+  color: var(--custom-text-muted);
+}
+
+.zoomview-close {
+  width: 3.6rem;
+  height: 3.4rem;
+  font-size: 2rem;
+  line-height: 1;
+  border: 1px solid var(--custom-border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.zoomview-close:hover {
+  border-color: var(--custom-primary);
+  color: var(--custom-primary);
+}
+
+.zoomview-scroll {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 2rem;
+  cursor: grab;
+  /* 內容比畫面小時置中，看起來比黏在左上角自然 */
+  display: grid;
+  place-content: center;
+}
+
+.zoomview-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* sizer 撐出「縮放後」的尺寸讓捲動範圍正確；stage 才是實際被 scale 的元素 */
+.zoomview-sizer {
+  position: relative;
+}
+
+.zoomview-stage {
+  transform-origin: 0 0;
+  width: max-content;
+}
+
+/* 覆蓋層裡不需要那些疊在角落的按鈕 */
+.zoomview .zoom-button,
+.zoomview .copy-code-button {
+  display: none;
+}
+
+/* 進了覆蓋層就不必再自己捲，捲動一律交給外層 */
+.zoomview .diagram-canvas,
+.zoomview pre.chroma,
+.zoomview div.chroma,
+.zoomview .lntable,
+.zoomview .katex-display,
+.zoomview .table-wrap {
+  overflow: visible;
+}
+
+/* 放大檢視裡的圖不要再受內嵌時的寬度規則影響，一律原尺寸交給 scale 控制 */
+.zoomview .diagram-canvas > svg {
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+}
+
+/* 圖在覆蓋層裡不該再顯示「可點擊放大」的游標 */
+.zoomview .diagram-canvas.is-clickable {
+  cursor: inherit;
+}
+
+@media (max-width: 768px) {
+  /* 手機的工具列塞不下提示文字，先讓位給控制項 */
+  .zoomview-hint { display: none; }
+  .zoomview-title { max-width: 50%; margin-right: auto; }
+  .zoomview-bar { gap: 1rem; padding: 0.8rem 1rem; }
+  .zoomview-scroll { padding: 1rem; }
+}
