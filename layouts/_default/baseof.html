@@ -64,22 +64,73 @@
   <script>
     (function () {
       var srcs = new WeakMap();
-      function pick() {
+
+      // 跟站上一致的色票。刻意不用 mermaid 內建的 'default'/'dark'：
+      // 內建深色主題畫甘特圖時，工作條的底色與字色撞在一起（實測看不到字），
+      // 而且配色跟這個以灰階＋少量橘為主的站不搭。
+      // theme:'base' + themeVariables 才能把每個角色的顏色都指定清楚。
+      var LIGHT = {
+        // 內文是 16px，mermaid 預設把甘特圖的軸與工作標籤畫成 11px，
+        // 擺在文章裡明顯小一截。字級統一拉到跟內文同一個尺度。
+        fontSize: '16px',
+        background: 'transparent',
+        primaryColor: '#ffffff', primaryTextColor: '#1c1917', primaryBorderColor: '#57534e',
+        secondaryColor: '#f5f5f4', tertiaryColor: '#e7e5e4',
+        lineColor: '#78716c', textColor: '#1c1917',
+        // 甘特圖：taskTextDarkColor 是「條是淺色時」條上的字，
+        // taskTextLightColor 是「條是深色時」的字。兩個都要給，不然會有一種情況看不到。
+        sectionBkgColor: '#f5f5f4', altSectionBkgColor: '#fafaf9',
+        taskBkgColor: '#e7e5e4', taskBorderColor: '#78716c',
+        taskTextColor: '#1c1917', taskTextDarkColor: '#1c1917',
+        taskTextLightColor: '#ffffff', taskTextOutsideColor: '#1c1917',
+        activeTaskBkgColor: '#fed7aa', activeTaskBorderColor: '#c2410c',
+        doneTaskBkgColor: '#d6d3d1', doneTaskBorderColor: '#78716c',
+        critBkgColor: '#fecaca', critBorderColor: '#dc2626',
+        gridColor: '#d6d3d1', todayLineColor: '#c2410c',
+        pie1: '#57534e', pie2: '#a8a29e', pie3: '#d6d3d1', pie4: '#c2410c',
+        pieTitleTextColor: '#1c1917', pieSectionTextColor: '#ffffff', pieStrokeColor: '#fafafa'
+      };
+      var DARK = {
+        // 內文是 16px，mermaid 預設把甘特圖的軸與工作標籤畫成 11px，
+        // 擺在文章裡明顯小一截。字級統一拉到跟內文同一個尺度。
+        fontSize: '16px',
+        background: 'transparent',
+        primaryColor: '#292524', primaryTextColor: '#e7e5e4', primaryBorderColor: '#a8a29e',
+        secondaryColor: '#1c1917', tertiaryColor: '#44403c',
+        lineColor: '#a8a29e', textColor: '#e7e5e4',
+        sectionBkgColor: '#292524', altSectionBkgColor: '#1f1c1a',
+        taskBkgColor: '#44403c', taskBorderColor: '#a8a29e',
+        // 深色模式下所有工作條都是深底，所以四個文字角色一律給亮色。
+        // 第一版照著變數名稱把 taskTextDarkColor 設成深色 #1c1917，
+        // 結果 mermaid 對「已完成／進行中」的條就是用這個值，深字疊深底，量到 1.87。
+        // 這幾個名稱指的是「哪一類條」而不是「文字深淺」，很容易寫反。
+        taskTextColor: '#e7e5e4', taskTextDarkColor: '#e7e5e4',
+        taskTextLightColor: '#e7e5e4', taskTextOutsideColor: '#e7e5e4',
+        activeTaskBkgColor: '#7c2d12', activeTaskBorderColor: '#fb923c',
+        doneTaskBkgColor: '#57534e', doneTaskBorderColor: '#a8a29e',
+        critBkgColor: '#7f1d1d', critBorderColor: '#f87171',
+        gridColor: '#57534e', todayLineColor: '#fb923c',
+        pie1: '#a8a29e', pie2: '#78716c', pie3: '#57534e', pie4: '#fb923c',
+        pieTitleTextColor: '#e7e5e4', pieSectionTextColor: '#1c1917', pieStrokeColor: '#212121'
+      };
+
+      function isDark() {
         var c = document.body.className;
-        if (c.indexOf('colorscheme-dark') > -1) return 'dark';
-        if (c.indexOf('colorscheme-light') > -1) return 'neutral';
-        return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'neutral';
+        if (c.indexOf('colorscheme-dark') > -1) return true;
+        if (c.indexOf('colorscheme-light') > -1) return false;
+        return matchMedia('(prefers-color-scheme: dark)').matches;
       }
+
       var last = null;
       function draw() {
         if (!window.mermaid) return;
         var nodes = [].slice.call(document.querySelectorAll('.mermaid'));
         if (!nodes.length) return;
-        var theme = pick();
-        if (theme === last) return;
-        last = theme;
+        var dark = isDark();
+        if (dark === last) return;
+        last = dark;
         nodes.forEach(function (n) {
-          // mermaid 會把元素內容換成 SVG，所以第一次先把原始碼留起來，
+          // mermaid 會把元素內容換成 SVG，所以第一次先把原始碼留起來；
           // 之後每次重繪都從留存的原始碼開始，否則第二次會拿 SVG 當輸入。
           if (!srcs.has(n)) srcs.set(n, n.textContent);
           n.textContent = srcs.get(n);
@@ -87,9 +138,12 @@
         });
         window.mermaid.initialize({
           startOnLoad: false,
-          theme: theme,
-          securityLevel: 'strict',
-          fontFamily: getComputedStyle(document.body).fontFamily
+          theme: 'base',
+          themeVariables: dark ? DARK : LIGHT,
+            securityLevel: 'strict',
+          fontFamily: getComputedStyle(document.body).fontFamily,
+          // 甘特圖的字級不吃 themeVariables.fontSize，要在這裡另外給。
+          gantt: { fontSize: 15, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 }
         });
         window.mermaid.run({ nodes: nodes });
       }
