@@ -1584,6 +1584,16 @@ pre, code, kbd, samp {
 @media (max-width: 768px) {
   .zoomview-bar { gap: 1rem; padding: 0.8rem 1rem; }
   .zoomview-scroll { padding: 1rem; }
+
+  /* 手機上再給標題一個硬上限。
+     理論上 flex 的 min-width:0 + ellipsis 已經夠了（實測 320px 螢幕、
+     50 字的圖說也會自動截到 104px 而不擠壓控制項），
+     但 flex 的收縮行為在部分瀏覽器並不一致，
+     控制項被擠掉是很明顯的壞掉，標題被截短則幾乎沒有代價 —— 所以多加這道保險。 */
+  .zoomview-title { max-width: 11rem; }
+
+  /* 百分比欄位縮窄一點，替控制項多留幾 px */
+  .zoomview-level { min-width: 5.2rem; }
 }
 
 /* rail 捲動時的捲軸：收合狀態下不該看到捲軸（那時只有幾條短線），
