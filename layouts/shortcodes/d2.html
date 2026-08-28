@@ -41,7 +41,14 @@
 
 {{- $src := replace .Inner "\r\n" "\n" -}}
 {{- $src = trim $src " \t\n\r" -}}
-{{- $joined := printf "%s\x01%s\x01%s\x01%s\x01%s\x01%s\x01%s" $src $layout $theme $darkTheme $sketch $pad $scale -}}
+{{- /* 全站共用樣式：內容一併算進雜湊，這樣改了 assets/d2/house.d2 的配色，
+       所有圖的雜湊都會變、自動重新渲染，不會沿用舊快取。
+       scripts/render-d2.mjs 讀同一個檔案、用同樣方式併入，兩邊必須一致。 */ -}}
+{{- $house := "" -}}
+{{- with resources.Get "d2/house.d2" -}}
+  {{- $house = replace .Content "\r\n" "\n" -}}
+{{- end -}}
+{{- $joined := printf "%s\x01%s\x01%s\x01%s\x01%s\x01%s\x01%s\x01%s" $src $layout $theme $darkTheme $sketch $pad $scale $house -}}
 {{- $key := substr (sha256 $joined) 0 16 -}}
 {{- $path := printf "diagrams/d2-%s.svg" $key -}}
 {{- $res := resources.Get $path -}}

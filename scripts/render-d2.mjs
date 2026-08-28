@@ -28,6 +28,17 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const CONTENT = path.join(ROOT, 'content');
 const OUTDIR = path.join(ROOT, 'assets', 'diagrams');
 
+// 全站共用的 D2 樣式（assets/d2/house.d2），會接在每張圖的原始碼前面。
+// 內容也一併算進雜湊：改了配色，所有圖就會自動重新渲染，不會沿用舊快取。
+// layouts/shortcodes/d2.html 讀同一個檔案、用同樣方式併入雜湊，兩邊才對得上。
+const HOUSE_PATH = path.join(ROOT, 'assets', 'd2', 'house.d2');
+let HOUSE = '';
+try {
+  HOUSE = (await fs.readFile(HOUSE_PATH, 'utf8')).replace(/\r\n/g, '\n');
+} catch {
+  HOUSE = '';   // 沒有這個檔案就退回 D2 預設主題
+}
+
 const OPEN = /\{\{<\s*d2([^>]*?)>\}\}/g;   // {{< d2 sketch="true" theme="1" >}}
 const CLOSE = '{{< /d2 >}}';
 
@@ -68,9 +79,9 @@ function renderOptsFrom(r) {
  * 兩邊產不出同一個字串。改成固定欄位順序、\x01 分隔的串接。
  * CRLF 也要先正規化 —— Windows 上的 .md 常是 CRLF，Hugo 的 .Inner 會照原樣帶進來。
  */
-function keyFor(src, r) {
+function keyFor(src, r, house) {
   const norm = src.replace(/\r\n/g, '\n').trim();
-  const joined = [norm, r.layout, r.theme, r.darkTheme, r.sketch, r.pad, r.scale].join('\x01');
+  const joined = [norm, r.layout, r.theme, r.darkTheme, r.sketch, r.pad, r.scale, house].join('\x01');
   return createHash('sha256').update(joined, 'utf8').digest('hex').slice(0, 16);
 }
 
@@ -156,7 +167,7 @@ const wanted = new Set();
 let rendered = 0, cached = 0;
 
 for (const b of blocks) {
-  const key = keyFor(b.src, b.raw);
+  const key = keyFor(b.src, b.raw, HOUSE);
   const name = `d2-${key}.svg`;
   const outPath = path.join(OUTDIR, name);
   wanted.add(name);
@@ -164,7 +175,10 @@ for (const b of blocks) {
   try { await fs.access(outPath); cached++; continue; } catch { /* 需要渲染 */ }
 
   try {
-    const r = await d2.compile(b.src.replace(/\r\n/g, '\n').trim(), { layout: b.raw.layout });
+    // 把全站樣式（assets/d2/house.d2）接在原始碼前面再編譯。
+    // HOUSE 已經算進雜湊，所以改了配色，所有圖都會重新渲染。
+    const source = (HOUSE ? HOUSE + '\n' : '') + b.src.replace(/\r\n/g, '\n').trim();
+    const r = await d2.compile(source, { layout: b.raw.layout });
     let svg = await d2.render(r.diagram, { ...r.renderOptions, ...renderOptsFrom(b.raw) });
     await fs.writeFile(outPath, addIntrinsicSize(retargetDarkCss(svg)), 'utf8');
     rendered++;
