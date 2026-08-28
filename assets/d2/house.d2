@@ -54,3 +54,18 @@ vars: {
     }
   }
 }
+
+# 字級跟內文對齊（內文是 18px）。D2 預設 16px、容器標題 28px，
+# 圖再被縮小之後標籤只剩 12–13px，跟旁邊的內文擺在一起明顯小一截。
+#
+# 這幾行不能合併成一條 `**.style.font-size`——
+# 目前這版 D2（v0.7.0）不吃遞迴 glob `**`，會回 `"style" needs a value`。
+# 只好分成：頂層節點、第二層節點、頂層連線、巢狀連線。
+*.style.font-size: 18
+*.*.style.font-size: 18
+(* -> *)[*].style.font-size: 18
+(*.* -> *.*)[*].style.font-size: 18
+# `->` 以外的連線型別要各自寫一條，否則會留在預設的 16px。
+(* <-> *)[*].style.font-size: 18
+(* -- *)[*].style.font-size: 18
+(* <- *)[*].style.font-size: 18

@@ -143,7 +143,10 @@
             securityLevel: 'strict',
           fontFamily: getComputedStyle(document.body).fontFamily,
           // 甘特圖的字級不吃 themeVariables.fontSize，要在這裡另外給。
-          gantt: { fontSize: 15, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 }
+          // 甘特圖的字級受工作條寬度限制：15px 時「Environment setup」量到 132px，
+          // 但那條只有 125px 寬，字會滿出條外（看起來就是跑版）。14px 才塞得下。
+          // 這是甘特圖本身的密度限制，不是設定沒生效。
+          gantt: { fontSize: 14, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 }
         });
         window.mermaid.run({ nodes: nodes });
       }
