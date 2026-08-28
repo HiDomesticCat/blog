@@ -1445,21 +1445,29 @@ pre, code, kbd, samp {
   flex: 0 0 auto;
 }
 
+/* 標題是唯一可以被壓縮的東西：min-width:0 讓 flex 真的縮得下去
+   （flex 項目預設 min-width:auto，會拒絕縮小到內容寬度以下），
+   縮到不夠時以 … 截斷。控制項則設成不可壓縮 —— 見下方。 */
 .zoomview-title {
   font-size: 1.5rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 55%;
+  flex: 0 1 auto;
+  min-width: 0;
   margin-right: auto;
 }
 
 
 /* 縮放控制做成一組相連的分段控制，視覺上是一個整體 */
+/* ⚠ flex-shrink: 0 很重要。
+   沒有它的話，標題一長就會把縮放控制壓扁：實測 360px 螢幕上工具列被壓到 89px，
+   但三顆按鈕需要 114px，於是溢出容器，「+」直接壓在關閉鈕底下（重疊 16px）。 */
 .zoomview-tools {
   display: flex;
   align-items: stretch;
+  flex: 0 0 auto;
   border: 1px solid var(--custom-border-color);
   border-radius: 8px;
   overflow: hidden;
@@ -1495,6 +1503,7 @@ pre, code, kbd, samp {
 }
 
 .zoomview-close {
+  flex: 0 0 auto;
   width: 3.6rem;
   height: 3.4rem;
   font-size: 2rem;
@@ -1573,7 +1582,6 @@ pre, code, kbd, samp {
 }
 
 @media (max-width: 768px) {
-  .zoomview-title { max-width: 60%; }
   .zoomview-bar { gap: 1rem; padding: 0.8rem 1rem; }
   .zoomview-scroll { padding: 1rem; }
 }
@@ -1744,5 +1752,24 @@ pre, code, kbd, samp {
   .post .post-content .gallery,
   .container.page article .gallery {
     grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  }
+}
+
+/* 手機上的插圖再收小一點。
+   桌機的 56vh 在手機上等於每張圖佔掉超過半個螢幕（實測 15 張裡有 7 張
+   高度超過視窗一半，最高 437px＝56%），一路滑下來閱讀節奏一直被圖打斷。
+   內嵌那份的任務是「看得出這是什麼」，要看細節點一下就放大 ——
+   所以這裡把它當成預覽在處理。 */
+@media (max-width: 600px) {
+  .post .post-content figure img,
+  .container.page article figure img {
+    max-height: 42vh;
+  }
+
+  /* 併排格子用 object-fit: cover，max-height 會直接決定格子高度，
+     aspect-ratio 只在還沒觸及上限時生效。 */
+  .post .post-content .gallery figure img,
+  .container.page article .gallery figure img {
+    max-height: 34vh;
   }
 }
