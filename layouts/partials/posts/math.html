@@ -1,0 +1,10 @@
+{{- /*
+  蓋掉主題的同名 partial。
+
+  主題原本在這裡塞三個 cdn.jsdelivr.net 的 <script>/<link>（KaTeX 0.16.4），
+  在瀏覽器端掃描整份文件再渲染數學式。改成建置期渲染之後：
+    - 不需要那些 script
+    - 樣式表改由 layouts/_default/baseof.html 有條件地放進 <head>，
+      放 <head> 才不會先閃一下未套用樣式的原始碼
+  這個檔案刻意留空，只是為了讓主題的呼叫點不再產生 CDN 請求。
+*/ -}}

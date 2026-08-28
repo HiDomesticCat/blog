@@ -40,6 +40,21 @@ hasCJKLanguage = true
   [markup.goldmark.renderer]
     unsafe = true            # 允許 Markdown 內嵌原生 HTML
 
+  # 數學式：把分隔符之間的內容原樣交給 render-passthrough.html，
+  # 由 transform.ToMath 在「建置期」用 KaTeX 渲染成 HTML+MathML。
+  # 因此訪客端不需要任何 JS，關掉 JS 也看得到式子。
+  #
+  # ⚠ 為什麼行內不用 $...$：
+  #   實測過，開了之後「這台設備要價 $50000 到 $60000 台幣」裡的
+  #   `$50000 到 $` 會被當成一條行內數學式吃掉。
+  #   價格在技術文章裡很常見，所以行內一律用 \( \)。
+  #   （行內程式碼與 code fence 內的 $ 不受影響，已實測。）
+  [markup.goldmark.extensions.passthrough]
+    enable = true
+    [markup.goldmark.extensions.passthrough.delimiters]
+      block  = [['$$', '$$'], ['\[', '\]']]
+      inline = [['\(', '\)']]
+
   [markup.tableOfContents]
     startLevel = 2
     endLevel   = 4

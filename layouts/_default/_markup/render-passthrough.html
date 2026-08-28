@@ -1,0 +1,15 @@
+{{- /*
+  建置期數學渲染。
+  goldmark 的 passthrough 擴充把分隔符之間的原文交到這裡（見 config.toml），
+  transform.ToMath 用 KaTeX 在建置時就渲染完成，輸出 HTML + MathML：
+    - HTML 那份負責視覺（需要 /katex/katex.min.css 與 woff2 字型，兩者都在本專案裡）
+    - MathML 那份給螢幕閱讀器與複製貼上
+  訪客端不需要任何 JavaScript，關掉 JS 也看得到式子。
+
+  .Type 是 "block"（$$…$$、\[…\]）或 "inline"（\(…\)）。
+  displayMode 決定式子要不要獨立成行、以及大型運算子的排版方式。
+
+  刻意不包 try：式子寫錯就讓建置失敗，比悄悄產出一頁壞掉的數學好。
+*/ -}}
+{{- $opts := dict "output" "htmlAndMathml" "displayMode" (eq .Type "block") -}}
+{{- transform.ToMath .Inner $opts -}}
