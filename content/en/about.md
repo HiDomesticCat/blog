@@ -52,8 +52,9 @@ and the things that went wrong along the way.
 | MOCSCTF | 2024 | 9th place |
 | MyFirstCTF | 2024 | 23rd place |
 | AIS3 pre-exam | 2024 | 47th place |
-| Cyber Warrior — Reloaded | 2024 | 94th place |
+| Cyber Warrior — Reloaded | 2020 | 94th place |
 | picoCTF | 2024 | 281st place |
+| picoCTF | 2025 | 271st place |
 | Shalun Cybersecurity Rising Stars | 2024 | Best Exhibition Award |
 
 ---
@@ -66,8 +67,6 @@ and the things that went wrong along the way.
 - **TSC CTF 2025** — Co-organiser
 - **NCKU Cybersecurity Base** — Critical Infrastructure Security Programme
 - **NICS Practical Network Security Course**
-- AIS3 Yunlin–Chiayi Security Camp 2023
-- SITCON 2023
 
 ---
 
