@@ -1,0 +1,66 @@
+{{- /*
+  D2 圖表（https://d2lang.com，MPL-2.0）。
+
+  用法：
+    {{< d2 caption="TLS 交握" >}}
+    client -> server: ClientHello
+    server -> client: ServerHello
+    {{< /d2 >}}
+
+  可用參數（都可省略）：
+    layout     dagre（預設）| elk
+    theme      淺色主題 ID，預設 0（Neutral default）
+    darkTheme  深色主題 ID，預設 200（Dark Mauve）
+    sketch     "true" 開手繪風
+    pad        邊距，預設 12
+    scale      縮放，省略時自動
+    caption    圖說（不影響圖的內容，故不計入雜湊）
+
+  圖不是在這裡渲染的 —— Hugo 無法呼叫外部程式。
+  scripts/render-d2.mjs 會在 hugo build 之前掃描 content/、
+  把每個區塊算出內容雜湊並產生 assets/diagrams/d2-<hash>.svg。
+  這支 shortcode 用同一套演算法算出雜湊、取檔案、行內嵌入。
+
+  ⚠ 雜湊兩邊必須逐位元組一致，改任一邊都要同步改另一邊：
+      欄位順序固定為 src, layout, theme, darkTheme, sketch, pad, scale
+      分隔符 \x01；src 先把 CRLF 正規化成 LF 再去頭尾空白。
+  ⚠ 一定要「行內」嵌入而不是 <img>：
+      SVG 內的深色規則被改寫成吃 body.colorscheme-dark，
+      放進 <img> 就看不到外層的 body class，手動切主題會失效。
+*/ -}}
+
+{{- $P := .Params -}}
+{{- $layout := "dagre" -}}{{- if isset $P "layout" }}{{ $layout = printf "%v" (index $P "layout") }}{{ end -}}
+{{- $theme := "0" -}}{{- if isset $P "theme" }}{{ $theme = printf "%v" (index $P "theme") }}{{ end -}}
+{{- $darkTheme := "200" -}}{{- if isset $P "darkTheme" }}{{ $darkTheme = printf "%v" (index $P "darkTheme") }}{{ end -}}
+{{- $pad := "12" -}}{{- if isset $P "pad" }}{{ $pad = printf "%v" (index $P "pad") }}{{ end -}}
+{{- $scale := "" -}}{{- if isset $P "scale" }}{{ $scale = printf "%v" (index $P "scale") }}{{ end -}}
+{{- /* 這裡刻意不用 `| default`：Hugo 的 default 把 "0" 也當成空值，
+       pad="0" 會被悄悄換成 "12"。用 isset 才分得出「沒給」與「給了 0」。 */ -}}
+{{- $sketch := cond (eq (printf "%v" (index $P "sketch")) "true") "true" "false" -}}
+
+{{- $src := replace .Inner "\r\n" "\n" -}}
+{{- $src = trim $src " \t\n\r" -}}
+{{- $joined := printf "%s\x01%s\x01%s\x01%s\x01%s\x01%s\x01%s" $src $layout $theme $darkTheme $sketch $pad $scale -}}
+{{- $key := substr (sha256 $joined) 0 16 -}}
+{{- $path := printf "diagrams/d2-%s.svg" $key -}}
+{{- $res := resources.Get $path -}}
+
+{{- if $res -}}
+{{- /* 取出 SVG 的原生寬度交給 CSS。
+       手機上不想把圖無限縮小 —— 1180px 寬的圖壓進 320px 只剩 27%，
+       16px 的標籤會變成 4px。CSS 用 --d2-w 把縮小幅度限制在 80%，
+       再寬就改成橫向捲動（見 custom.css 的 .diagram-canvas）。 */ -}}
+{{- $w := "" -}}
+{{- with findRESubmatch `<svg[^>]*?\swidth="([0-9.]+)"` $res.Content 1 -}}
+  {{- $w = index (index . 0) 1 -}}
+{{- end -}}
+<figure class="diagram diagram--d2">
+  <div class="diagram-canvas"{{ with $w }} style="{{ printf "--d2-w:%spx" . | safeCSS }}"{{ end }}>{{ $res.Content | safeHTML }}</div>
+  {{- with .Get "caption" }}
+  <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>
+{{- else -}}
+{{- errorf "找不到 %s。這張 d2 圖還沒渲染 —— 請先執行 `npm run diagrams`（在 %s 第 %d 行附近）。原始碼開頭：%.60s" $path $.Page.File.Path .Position.LineNumber $src -}}
+{{- end -}}

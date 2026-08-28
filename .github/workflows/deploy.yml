@@ -32,6 +32,21 @@ jobs:
           hugo-version: ${{ env.HUGO_VERSION }}
           extended: true
 
+      # d2 圖表是建置期渲染的（見 scripts/render-d2.mjs）。
+      # 產出的 SVG 刻意不進 git：交給 CI 產生，才能保證圖永遠跟原始碼同步，
+      # 也讓你在沒有 Node 的機器上（例如 GitHub 網頁編輯器）改文章一樣能發佈。
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install diagram toolchain
+        run: npm ci
+
+      - name: Render d2 diagrams
+        run: npm run diagrams
+
       - name: Build site
         env:
           HUGO_ENVIRONMENT: production

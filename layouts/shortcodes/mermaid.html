@@ -1,0 +1,18 @@
+{{- /*
+  蓋掉主題的 mermaid shortcode。
+
+  主題原本只輸出 <div class="mermaid">，沒有捲動容器也沒有圖說，
+  寬一點的圖在手機上會把整頁撐出橫向捲軸。
+  這裡包一層 .diagram-canvas（自己的 overflow-x:auto），
+  圖再寬也只有圖自己捲，頁面不會跑版。
+
+  註：D2（{{< d2 >}}）是這個站的主力圖表工具 —— 建置期產 SVG、訪客端零 JS。
+  mermaid 保留是為了相容從別處貼過來的圖，以及 D2 沒有的圖型
+  （甘特圖、圓餅圖、mindmap、gitGraph 等）。用到才會載入那 2.5 MB。
+*/ -}}
+<figure class="diagram diagram--mermaid">
+  <div class="diagram-canvas"><pre class="mermaid">{{- .Inner | safeHTML -}}</pre></div>
+  {{- with .Get "caption" }}
+  <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>

@@ -12,3 +12,6 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# d2 圖表產出（由 scripts/render-d2.mjs 依內容雜湊產生，CI 會重新產生）
+assets/diagrams/

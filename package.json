@@ -1,0 +1,14 @@
+{
+  "name": "hicat0x0-blog",
+  "private": true,
+  "type": "module",
+  "description": "建置期圖表渲染工具鏈。Hugo 本身不需要 Node，只有 d2 圖表需要。",
+  "scripts": {
+    "diagrams": "node scripts/render-d2.mjs",
+    "build": "npm run diagrams && hugo --minify --destination docs",
+    "dev": "npm run diagrams && hugo server -D"
+  },
+  "devDependencies": {
+    "@terrastruct/d2": "0.1.33"
+  }
+}
