@@ -177,7 +177,7 @@ It replaces the business card entirely: nothing on paper, one tap and it is on y
 The official framing was clear that this is not just a collection game — **"don't only exchange business cards, exchange trading cards too"**. It exists to give you a reason to talk to a stranger.
 
 {{< gallery cols="2" >}}
-{{< figure src="09-badge-front.jpg" alt="An NFC card printed with my own design" caption="My own printed NFC card" >}}
+{{< figure src="09-badge-front.jpg" alt="An NFC card printed with my own design" caption="Printed onto an NFC card" >}}
 {{< figure src="23-nfc-profile.jpg" alt="The personal card screen in the NFC badge app" caption="The card in the app. I reworked my old avatar into something more hacker-ish and I like how it came out 😎" >}}
 {{< /gallery >}}
 

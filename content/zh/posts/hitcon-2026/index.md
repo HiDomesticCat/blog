@@ -177,7 +177,7 @@ Orange 詳解他在 Pwn2Own Berlin 2026 上用的 Microsoft Edge（Chromium）�
 不過官方寫得很清楚，這不只是收集遊戲——**「別只交換名片，也來交換卡片吧」**。它本來就是設計來讓你有理由跟陌生人開口的。
 
 {{< gallery cols="2" >}}
-{{< figure src="09-badge-front.jpg" alt="印了自己圖案的 NFC 小卡" caption="自己印的 NFC 小卡" >}}
+{{< figure src="09-badge-front.jpg" alt="印了自己圖案的 NFC 小卡" caption="印成 NFC 小卡" >}}
 {{< figure src="23-nfc-profile.jpg" alt="NFC badge App 裡的個人卡片畫面" caption="App 裡的卡片。我把我的舊頭貼做了駭客風的修改，感覺還不錯😎" >}}
 {{< /gallery >}}
 
