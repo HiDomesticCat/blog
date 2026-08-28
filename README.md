@@ -254,13 +254,87 @@ rtl_tcp -a 0.0.0.0 -p 1234
 ```
 ````
 
+要行號與標記重點行，在語言後面加參數：
+
+````markdown
+```go {linenos=true, hl_lines=[3-4]}
+```
+````
+
 配色來自主題的 `_syntax.scss`（`markup.highlight.noClasses = false`，
 所以 Chroma 輸出的是 CSS class，設 `style` 不會有效果）。
+等寬字是自帶的 JetBrains Mono，見下方[字體](#字體)。
 
-### 數學與圖表
+### 數學式
 
-- **KaTeX**：`config.toml` 加 `math = true`，或單篇 front matter 加 `math = true`
-- **Mermaid**：用 `{{< mermaid >}}` 短代碼，主題會自動載入腳本
+**在建置期就渲染完成**，訪客端不需要 JavaScript，關掉 JS 也看得到。
+不必在 front matter 寫 `math = true`，有寫式子就會自動載入樣式表。
+
+```markdown
+行內用 \( \)：碰撞抗性是 \(2^{128}\) 而不是 \(2^{256}\)。
+
+區塊用 $$ $$：
+
+$$
+P(\text{碰撞}) \approx 1 - e^{-\frac{k(k-1)}{2N}}
+$$
+```
+
+⚠ **行內不要用 `$ $`**，`config.toml` 也刻意沒開。
+開了之後「這台設備要價 $50000 到 $60000 台幣」裡的 `$50000 到 $`
+會被當成一條數學式吃掉。行內程式碼與圍欄區塊裡的 `$` 不受影響。
+
+### 圖表
+
+主力是 **D2**（[d2lang.com](https://d2lang.com)，MPL-2.0）。
+圖在**建置期**變成 SVG，所以訪客端零 JavaScript、沒有 CDN，
+深色模式也會跟著右下角的主題切換走。
+
+```markdown
+{{< d2 caption="圖說" >}}
+client -> server: ClientHello
+server -> client: ServerHello
+{{< /d2 >}}
+```
+
+參數（都可省略）：
+
+| 參數 | 預設 | 說明 |
+|------|------|------|
+| `layout` | `dagre` | 換 `elk` 可得到較整齊的分層 |
+| `theme` | `0` | 淺色主題 ID |
+| `darkTheme` | `200` | 深色主題 ID |
+| `sketch` | `false` | `"true"` 開手繪風 |
+| `pad` | `12` | 邊距 |
+| `caption` | — | 圖說 |
+
+⚠ **改完圖要重新渲染才看得到**：
+
+```bash
+npm run diagrams
+```
+
+`./build-and-deploy.sh`（serve 與 build 兩種模式）與 CI 都會自動跑這一步，
+只有直接呼叫 `hugo` 時要自己記得。圖沒渲染的話建置會失敗並指出缺哪一張。
+
+產出在 `assets/diagrams/`，**不進版控**：檔名是內容雜湊，CI 會重新產生，
+這樣圖永遠跟原始碼同步，你在沒有 Node 的機器上改文章也一樣能發佈。
+
+**Mermaid** 保留給 D2 沒有的圖型（甘特圖、圓餅圖、mindmap）：
+
+```markdown
+{{< mermaid caption="圖說" >}}
+gantt
+    title 研究時程
+    section 前期
+    文獻回顧 :done, a1, 2026-09-01, 30d
+{{< /mermaid >}}
+```
+
+它是在瀏覽器渲染的，用到的頁面才會載入那 2.5 MB（`static/js/`，不走 CDN）。
+
+> 完整的元件範例在 `content/{zh,en}/posts/tech-rendering-demo/`（草稿，不會發佈）。
+> 用 `./build-and-deploy.sh serve` 預覽時看得到。
 
 ---
 
@@ -304,6 +378,30 @@ hugo-coder 的首頁（`partials/home.html`）只渲染頭像、作者、一句�
 
 > 主題升級時要記得比對 `themes/hugo-coder/assets/js/coder.js` 是否有變動，
 > 這是整份覆寫，不是 patch。
+
+### 字體
+
+| 用途 | 字體 | 來源 |
+|------|------|------|
+| 西文內文 / 標題 | Inter（400 / 600 / 700） | 自帶，`static/fonts/` |
+| 程式碼 | JetBrains Mono（400 / 700） | 自帶，`static/fonts/` |
+| 正體中文 | 蘋方 / 微軟正黑體 / Noto Sans TC | 系統內建 |
+
+兩支自帶字體都是 OFL-1.1，沒有任何 CDN 請求。
+每個 `@font-face` 都帶 `unicode-range`，所以 `latin-ext` 只有在頁面真的出現
+波蘭文、土耳其文那類重音字母時才下載，平常是 0；
+**中文碼位不在任何一個範圍內**，因此西文字體不可能攔截中文，
+中文一定落到堆疊裡的系統字型。
+
+中文刻意不自帶：各平台都已內建高品質正體字型，自帶要付好幾 MB 與首屏延遲。
+
+⚠ 主題原本的字體堆疊裡 **一個正體中文字型都沒有**（只有日文的
+`游ゴシック` 與簡體的 `Microsoft YaHei` 等）。Windows 兩者都預裝，
+於是正體中文被日文／簡體字型排版，而且各字型收字範圍不同 ——
+`啟` 在 Yu Gothic 沒有（日文寫 `啓`）就掉到微軟雅黑，
+同一個詞裡混了兩套字型。`assets/css/custom.css` 的 `--font-sans` 修正了這件事，
+`layouts/_default/baseof.html` 也把 `<html lang>` 從 `zh` 改成 `zh-Hant`
+（漢字統一碼要靠 lang 才分得出要用哪一種字形）。
 
 ---
 

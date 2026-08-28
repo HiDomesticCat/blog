@@ -21,13 +21,34 @@ command -v hugo >/dev/null 2>&1 || {
 
 echo "使用的 Hugo：$(hugo version)"
 
+# d2 圖表是在建置「之前」渲染成 SVG 的（scripts/render-d2.mjs）。
+# 沒先跑這一步的話，用到 {{< d2 >}} 的文章會讓 hugo 直接建置失敗，
+# 錯誤訊息會指出缺哪個檔案。沒有 Node 也能建置 —— 只要文章沒用到 d2。
+render_diagrams() {
+  if [ ! -f package.json ]; then
+    return 0
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "警告：找不到 npm，略過 d2 圖表渲染。文章若用到 {{< d2 >}} 會建置失敗。" >&2
+    return 0
+  fi
+  if [ ! -d node_modules ]; then
+    echo "安裝圖表工具鏈…"
+    npm ci
+  fi
+  npm run --silent diagrams
+}
+
 case "$MODE" in
   serve)
+    render_diagrams
     echo "啟動預覽伺服器 → http://localhost:${PORT}/zh/"
     exec hugo server --bind 0.0.0.0 --port "$PORT" --buildDrafts --disableFastRender
     ;;
 
   build)
+    render_diagrams
+
     echo "清除舊的產出…"
     rm -rf public resources .hugo_build.lock
 
