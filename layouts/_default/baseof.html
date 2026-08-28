@@ -121,13 +121,14 @@
         return matchMedia('(prefers-color-scheme: dark)').matches;
       }
 
-      function ganttOpts(extraWidth) {
+      function ganttOpts(n) {
         var g = { fontSize: 14, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 };
-        if (extraWidth) { g.useWidth = extraWidth; g.useMaxWidth = false; }
+        if (n && n.__leftPad) g.leftPadding = n.__leftPad;
+        if (n && n.__ganttWidth) { g.useWidth = n.__ganttWidth; g.useMaxWidth = false; }
         return g;
       }
 
-      function configure(dark, extraWidth) {
+      function configure(dark, n) {
         window.mermaid.initialize({
           startOnLoad: false,
           theme: 'base',
@@ -135,7 +136,7 @@
           securityLevel: 'strict',
           fontFamily: getComputedStyle(document.body).fontFamily,
           // 甘特圖的字級不吃 themeVariables.fontSize，要在這裡另外給。
-          gantt: ganttOpts(extraWidth)
+          gantt: ganttOpts(n)
         });
       }
 
@@ -147,31 +148,86 @@
         n.removeAttribute('data-processed');
       }
 
-      function hasOutsideLabel(n) {
-        return !!n.querySelector('text.taskTextOutsideRight, text.taskTextOutsideLeft');
+      // 甘特圖有兩個會「壓到東西」的地方，兩個都源自固定尺寸配上不固定的文字長度：
+      //
+      //   1. 工作條太窄放不下標籤 → mermaid 把標籤丟到條外的格線上。
+      //      條寬 = 工期 ÷ 圖表總寬，所以欄位一窄就會發生。
+      //      實測 860px 欄寬時「Environment setup」124px 塞在 125px 的條裡，
+      //      只剩 1px —— 頁面縮放就足以讓它爆掉。解法是把整張圖加寬。
+      //
+      //   2. 左側區段標籤比 leftPadding（預設 75）長 → 文字伸進圖表區壓到工作條。
+      //      實測「Implementation」109px，壓進第一根條 44px。解法是撐開左欄。
+      //
+      // 兩者都用同一套：畫完先量，量到問題就帶著新參數重畫。
+      function measureFixes(n) {
+        var svg = n.querySelector('svg');
+        if (!svg) return null;
+        var box = svg.getBoundingClientRect();
+        var vb = svg.viewBox && svg.viewBox.baseVal;
+        // 參數是 SVG 使用者座標，量到的是螢幕像素，圖被縮放時要換算回去
+        var scale = (vb && vb.width && box.width) ? box.width / vb.width : 1;
+        var fix = { widen: false, leftPad: 0 };
+
+        if (n.querySelector('text.taskTextOutsideRight, text.taskTextOutsideLeft')) fix.widen = true;
+
+        // today 標記：今天落在圖表日期範圍之外時，mermaid 仍然把線畫出來，
+        // 位置會跑到左側的區段標籤區裡，看起來就是一條線把標題切開
+        // （實測 today 線 x=269、「Implementation」右緣 272，切了 3px）。
+        // 範圍外的 today 線沒有意義，直接藏起來。
+        var gridXs = [];
+        n.querySelectorAll('.grid .tick line').forEach(function (l) {
+          var r = l.getBoundingClientRect();
+          if (r.height) gridXs.push(r.left);
+        });
+        if (gridXs.length) {
+          var gMin = Math.min.apply(null, gridXs), gMax = Math.max.apply(null, gridXs);
+          n.querySelectorAll('.today').forEach(function (l) {
+            var x = l.getBoundingClientRect().left;
+            if (x < gMin - 1 || x > gMax + 1) l.style.display = 'none';
+          });
+        }
+
+        var maxRight = 0;
+        n.querySelectorAll('.sectionTitle').forEach(function (t) {
+          var r = t.getBoundingClientRect();
+          if (r.width) maxRight = Math.max(maxRight, (r.right - box.left) / scale);
+        });
+        var firstBar = Infinity;
+        n.querySelectorAll('rect.task').forEach(function (r) {
+          firstBar = Math.min(firstBar, (r.getBoundingClientRect().left - box.left) / scale);
+        });
+        if (maxRight && firstBar !== Infinity && maxRight > firstBar - 8) {
+          fix.leftPad = Math.ceil(maxRight + 16);
+        }
+        return fix;
       }
 
-      // 甘特圖的工作條寬度 = 工期 ÷ 圖表總寬，所以欄位一窄，
-      // 稍長的標籤就塞不進條裡，mermaid 會把它丟到條外的格線上 —— 看起來就是跑版。
-      // 這不是字級問題（實測 860px 時「Environment setup」124px 塞在 125px 的條裡，
-      // 只剩 1px 餘裕，欄位再窄一點就爆），所以改成：偵測到有標籤被丟出去，
-      // 就把圖加寬重畫，直到塞得下。加寬後的圖比內文欄寬，交給既有的橫向捲動與放大檢視。
-      function widenUntilLabelsFit(dark, nodes) {
+      function refineLayout(dark, nodes) {
         var pass = 0;
         var step = function () {
-          var bad = nodes.filter(hasOutsideLabel);
-          if (!bad.length || pass >= 3) return;
-          pass++;
-          bad.forEach(function (n) {
-            var w = n.__ganttWidth || Math.round(n.getBoundingClientRect().width) || 860;
-            n.__ganttWidth = Math.round(w * 1.25);
-            resetNode(n);
+          if (pass >= 3) return;
+          var todo = [];
+          nodes.forEach(function (n) {
+            var fix = measureFixes(n);
+            if (!fix) return;
+            var changed = false;
+            if (fix.leftPad && fix.leftPad > (n.__leftPad || 0)) { n.__leftPad = fix.leftPad; changed = true; }
+            if (fix.widen) {
+              var w = n.__ganttWidth || Math.round(n.getBoundingClientRect().width) || 860;
+              n.__ganttWidth = Math.round(w * 1.25);
+              changed = true;
+            }
+            if (changed) todo.push(n);
           });
-          // 每個節點的寬度可能不同，只能逐一設定後再渲染
+          if (!todo.length) return;
+          pass++;
+          // mermaid 的設定是全域的，不是每張圖各自帶設定，
+          // 所以每張圖都要「先設定再渲染」，只能串成序列。
           var chain = Promise.resolve();
-          bad.forEach(function (n) {
+          todo.forEach(function (n) {
             chain = chain.then(function () {
-              configure(dark, n.__ganttWidth);
+              resetNode(n);
+              configure(dark, n);
               return window.mermaid.run({ nodes: [n] });
             });
           });
@@ -188,10 +244,10 @@
         var dark = isDark();
         if (dark === last) return;
         last = dark;
-        nodes.forEach(function (n) { n.__ganttWidth = 0; resetNode(n); });
-        configure(dark, 0);
+        nodes.forEach(function (n) { n.__ganttWidth = 0; n.__leftPad = 0; resetNode(n); });
+        configure(dark, null);
         var done = window.mermaid.run({ nodes: nodes });
-        if (done && done.then) done.then(function () { widenUntilLabelsFit(dark, nodes); });
+        if (done && done.then) done.then(function () { refineLayout(dark, nodes); });
       }
       window.__initMermaid = draw;
       // 主題切換是改 body 的 class，用 MutationObserver 接；

@@ -556,7 +556,11 @@ figure figcaption p {
     /* 以「內文欄」為基準定位，不是貼視窗左緣。
        內文欄約 86rem 寬置中，所以左緣在 calc(50% - 43rem)；
        再往左退 9rem 放 rail。max() 保證視窗很窄時不會跑到畫面外。 */
-    left: max(1.6rem, calc(50% - 52rem));
+    /* clamp 的上限很重要：沒有它的話 rail 會一直跟著中心跑，
+       視窗很寬時（例如 80% 縮放）它會停在畫面中段，
+       正好擋住下面那些「撐開的寬內容」。加上上限之後，
+       寬螢幕時 rail 會靠向左緣，把中間讓出來。 */
+    left: clamp(1.6rem, calc(50% - 52rem), 6rem);
     top: 50%;
     transform: translateY(-50%);
     z-index: 900;
@@ -1593,4 +1597,84 @@ pre, code, kbd, samp {
 .zoomview-stage,
 .zoomview-stage * {
   user-select: text;
+}
+
+/* mermaid 的捲動統一交給 .diagram-canvas，跟 D2 一致。
+   否則捲動發生在內層的 pre.mermaid 上，吃不到 .diagram-canvas 的捲軸樣式，
+   量測時也容易誤判成「內容被裁掉」（canvas 的 scrollWidth 看起來沒有溢出）。 */
+.post .post-content .diagram--mermaid pre.mermaid,
+.container.page article .diagram--mermaid pre.mermaid {
+  overflow: visible;
+}
+
+.post .post-content .diagram-canvas::-webkit-scrollbar,
+.container.page article .diagram-canvas::-webkit-scrollbar {
+  height: 8px;
+}
+
+/* ===== 註腳 =====
+   註腳連結是頁內跳轉，但當來源與目標離得近時（短文章尤其明顯），
+   畫面幾乎不動，讀者不確定到底跳了沒。
+   :target 讓被跳到的那一條短暫亮起來，跳到哪裡一眼就看得到。 */
+.post .post-content .footnotes li:target,
+.container.page article .footnotes li:target,
+.post .post-content sup[id^="fnref"]:target,
+.container.page article sup[id^="fnref"]:target {
+  background: color-mix(in srgb, var(--custom-primary) 16%, transparent);
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--custom-primary) 16%, transparent);
+  animation: footnote-flash 1.6s ease-out 1;
+}
+
+@keyframes footnote-flash {
+  0%   { background: color-mix(in srgb, var(--custom-primary) 42%, transparent); }
+  100% { background: color-mix(in srgb, var(--custom-primary) 16%, transparent); }
+}
+
+/* 跳轉目標不要卡在視窗最上緣，留一點上方空間才看得到前後文 */
+.post .post-content .footnotes li,
+.container.page article .footnotes li,
+.post .post-content h2[id],
+.post .post-content h3[id],
+.post .post-content h4[id] {
+  scroll-margin-top: 2rem;
+}
+
+/* =============================================================================
+   寬內容的「撐開」（breakout）
+   -----------------------------------------------------------------------------
+   內文欄固定 860px 是刻意的 —— 一行超過 75 字左右就難讀，所以文字不加寬。
+   但圖表、程式碼、表格沒有這個限制，視窗寬的時候讓它們撐出內文欄，
+   就能少掉很多橫向捲動（80% 縮放時右邊本來是一大片空白）。
+
+   刻意用分段的固定值而不是 100vw：100vw 含捲軸寬度，
+   在有捲軸的視窗會多出幾 px 而讓整頁產生橫向捲動。
+   上限也不能太大 —— 左邊還有 rail，撐太寬會壓到它。
+   ============================================================================= */
+/* 第一段門檻取 1220 而不是 1180：1180 時撐開的區塊左緣在 103px，
+   而 rail 右緣在 101px —— 只差 2px，太緊。1220 時間隙有 29px。 */
+@media (min-width: 1220px) {
+  .post .post-content > .diagram,
+  .post .post-content > .highlight,
+  .post .post-content > .zoom-host {
+    --breakout: 96rem;
+    width: var(--breakout);
+    margin-left: calc(50% - var(--breakout) / 2);
+  }
+}
+
+@media (min-width: 1400px) {
+  .post .post-content > .diagram,
+  .post .post-content > .highlight,
+  .post .post-content > .zoom-host {
+    --breakout: 112rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .post .post-content > .diagram,
+  .post .post-content > .highlight,
+  .post .post-content > .zoom-host {
+    --breakout: 120rem;
+  }
 }
