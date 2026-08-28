@@ -5,11 +5,21 @@
    ⚠ 單位注意：主題設了 html { font-size: 62.5% }，
      所以這份檔案裡 1rem = 10px，不是 16px。
      body 是 1.8rem = 18px。寫字級時請照這個尺標。
+
+   ⚠ 選擇器強度：主題把內容包在 .content 底下，並用巢狀寫法產生像
+     `.content figure`、`.post .post-content img` 這類 (0,1,1) 以上的規則。
+     這裡若用裸元素選擇器（figure、img）會被蓋掉且完全沒有錯誤訊息，
+     所以覆寫時請一併寫上 `.post .post-content …` / `.container.page article …`。
    ============================================== */
 
 /* ===== CSS Variables ===== */
 :root {
-  --custom-primary: #2563eb;
+  /* 強調色：橘。整站只用這一個強調色，藍橘並存會互相打架。
+     淺色模式用深橘（在 #fafafa 上對比才夠），深色模式用亮橘。 */
+  --custom-primary: #c2410c;
+  /* 連結色跟強調色分開：藍＝可點擊，橘＝結構與強調。
+     連結數量多，用橘色會讓橘色從點綴變主色。 */
+  --custom-link: #1d4ed8;
   --custom-secondary: #7c3aed;
   --custom-accent: #10b981;
   --custom-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -18,15 +28,44 @@
   --custom-bg-card: #ffffff;
   --custom-bg-subtle: #f9fafb;
   --custom-text-muted: #6b7280;
+  /* 浮起表面（blockquote、表頭、列 hover）。淺色與深色差在這一個值，
+     以前是靠三條 body.colorscheme-dark 規則各自覆寫，
+     收斂成 token 之後 auto 模式只要複製 token 區塊就好。 */
+  --custom-bg-raised: #f9fafb;
 }
 
+/* 深色 token。
+   ⚠ 這一份必須寫兩次，原因是設定檔用 colorScheme = "auto"：
+      使用者「明確」切到深色時 body 是 .colorscheme-dark，
+      但預設狀態 body 是 .colorscheme-auto —— 這時主題只靠
+      @media (prefers-color-scheme: dark) 換底色，.colorscheme-dark 根本不匹配。
+      漏掉下面那份 auto 的話，預設訪客會拿到「深底色 + 淺色模式的橘」，
+      #c2410c 落在 #212121 上對比只有 1.96，等於整站點綴全部看不清楚。
+   CSS 沒有 mixin，所以只能複製；要改顏色請兩邊一起改。 */
 body.colorscheme-dark {
+  --custom-primary: #fb923c;
+  --custom-link: #60a5fa;
   --custom-border-color: #374151;
   --custom-bg-card: #1f2937;
   --custom-bg-subtle: #111827;
+  --custom-bg-raised: #1f2937;
   --custom-text-muted: #9ca3af;
   --custom-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
   --custom-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto {
+    --custom-primary: #fb923c;
+    --custom-link: #60a5fa;
+    --custom-border-color: #374151;
+    --custom-bg-card: #1f2937;
+    --custom-bg-subtle: #111827;
+    --custom-bg-raised: #1f2937;
+    --custom-text-muted: #9ca3af;
+    --custom-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --custom-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
 }
 
 /* ===== Navigation underline animation ===== */
@@ -95,15 +134,64 @@ body.colorscheme-dark {
   margin-bottom: 0.5rem;
 }
 
+/* ===== 文章的標題層級 =====
+   主題給 h2 26px、h3 22px，字重與上下間距完全一樣，只差 4px，
+   讀者看不出哪個是大節。這裡把 h2 拉開成明確的「章」。 */
+.post .post-content h2 {
+  position: relative;
+  font-size: 3.2rem;
+  margin-top: 6.4rem;
+  margin-bottom: 2rem;
+  padding-top: 2.6rem;
+}
+
+/* 大節上方的短橘條。比整條灰線輕，但辨識度更高。 */
+.post .post-content h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4.8rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--custom-primary);
+}
+
+.post .post-content h3 {
+  font-size: 2.2rem;
+  margin-top: 4.4rem;
+  margin-bottom: 1.4rem;
+}
+
+@media (max-width: 768px) {
+  /* 主題的文章標題固定 4rem，在 360px 的手機上會斷成三行、
+     整個第一屏只剩標題。縮到 2.8rem 才讀得順。 */
+  .post .title,
+  .post .title a {
+    font-size: 2.8rem;
+    line-height: 1.3;
+  }
+
+  .post .post-content h2 {
+    font-size: 2.6rem;
+    margin-top: 4.8rem;
+    padding-top: 2.2rem;
+  }
+
+  .post .post-content h3 {
+    font-size: 2rem;
+    margin-top: 3.6rem;
+  }
+}
+
 /* ===== Code blocks ===== */
 pre {
   border-radius: 8px !important;
   box-shadow: var(--custom-shadow-md);
 }
 
-code {
-  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
-}
+/* 程式碼字型統一由 --font-mono 決定（定義在 :root，字體檔在檔案最下方）。
+   原本這裡寫 'Fira Code'，但那支字型幾乎沒人裝，實際上一直是落回 Consolas。 */
 
 /* Inline code */
 p code, li code, td code {
@@ -113,17 +201,52 @@ p code, li code, td code {
   border: 1px solid var(--custom-border-color);
 }
 
+/* ===== 內文連結 =====
+   維持黑白：連結用文字色 + 一條低調的底線標示，滑過去才出現橘色。
+   主題預設是藍色連結，跟橘色點綴會變成兩個強調色；
+   而整片連結都上橘色又會讓橘色從「點綴」變成「主色」。
+   導覽列與頁尾維持主題原樣，不動。
+
+   註：這裡刻意不寫 a:visited。CSS 自訂屬性在 :visited 規則裡
+   不保證能正確解析（瀏覽器為了防止歷史紀錄探測會限制求值），
+   要寫的話必須用字面色碼，不能用 var()。 */
+.post .post-content a,
+.container.page article a,
+.container.list ul li a {
+  color: var(--custom-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: color 0.2s ease;
+}
+
+.post .post-content a:hover,
+.container.page article a:hover,
+.container.list ul li a:hover {
+  color: var(--custom-primary);
+}
+
+/* 頁面標題本身是連結，不需要底線 */
+/* 頁面／文章標題本身是連結，但它不是「內容連結」，維持文字色 */
+.post .title-link,
+.container.page article .title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 目錄是導覽用途，維持素色，只有滑過與目前位置才上橘 */
+#TableOfContents a {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* ===== Blockquote ===== */
 blockquote {
   border-left: 4px solid var(--custom-primary) !important;
   padding: 1rem 1.5rem;
   margin: 1.5rem 0;
-  background: var(--custom-bg-subtle);
+  background: var(--custom-bg-raised);
   border-radius: 0 8px 8px 0;
-}
-
-body.colorscheme-dark blockquote {
-  background: var(--custom-bg-card);
 }
 
 /* ===== TOC (wrapper from layouts/partials/toc.html) ===== */
@@ -131,12 +254,55 @@ body.colorscheme-dark blockquote {
   margin: 0 0 2rem;
 }
 
+/* <summary> 預設有原生的三角形箭頭，換成自己畫的，兩邊瀏覽器才一致 */
+/* 做成明確的按鈕外觀。之前是一行小灰字，看起來像註解而不是可以點的東西。 */
 .toc .toc-title {
-  margin: 0 0 0.5rem;
-  padding: 0;
-  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0 1.8rem;
+  border: 1px solid var(--custom-border-color);
+  border-radius: 8px;
+  background: var(--custom-bg-card);
   font-size: 1.6rem;
-  color: var(--custom-text-muted);
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  /* 觸控目標至少 44px 高 */
+  min-height: 4.4rem;
+}
+
+/* 展開後跟下面的目錄框留點距離 */
+.toc[open] .toc-title {
+  margin-bottom: 1.2rem;
+}
+
+.toc .toc-title::-webkit-details-marker {
+  display: none;
+}
+
+.toc .toc-title::before {
+  content: "";
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+}
+
+.toc[open] .toc-title::before {
+  transform: rotate(45deg);
+}
+
+.toc .toc-title:hover {
+  color: var(--custom-primary);
+  border-color: var(--custom-primary);
 }
 
 /* The <nav id="TableOfContents"> that Hugo generates */
@@ -144,8 +310,11 @@ body.colorscheme-dark blockquote {
   background: var(--custom-bg-card);
   border: 1px solid var(--custom-border-color);
   border-radius: 8px;
-  padding: 1rem 1.5rem;
+  padding: 1.4rem 2rem;
   margin-bottom: 2rem;
+  /* 比內文小一級。長文的目錄用內文字級會佔掉整個第一屏。 */
+  font-size: 1.5rem;
+  line-height: 1.55;
 }
 
 #TableOfContents ul {
@@ -155,11 +324,24 @@ body.colorscheme-dark blockquote {
 }
 
 #TableOfContents ul ul {
-  padding-left: 1.25rem;
+  padding-left: 1.2rem;
 }
 
 #TableOfContents li {
-  padding: 0.2rem 0;
+  padding: 0.15rem 0;
+}
+
+/* 寬螢幕分兩欄。break-inside 讓某一節的子項不會跟它的標題被拆到不同欄。 */
+@media (min-width: 900px) {
+  #TableOfContents > ul {
+    columns: 2;
+    column-gap: 3.2rem;
+  }
+
+  #TableOfContents > ul > li {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
 }
 
 #TableOfContents a {
@@ -173,7 +355,13 @@ body.colorscheme-dark blockquote {
 }
 
 /* ===== Tables ===== */
-table {
+/* ⚠ 一定要排除 .lntable：Chroma 開了行號之後，程式碼是包在一個
+   <table class="lntable"> 裡的（左欄行號、右欄程式碼）。
+   下面這個 overflow:hidden 本來只是為了讓 border-radius 能裁圓角，
+   套到 lntable 上就變成「把超出寬度的程式碼直接切掉，而且捲不到」——
+   在 360px 的手機上，一行 457px 的程式碼有 193px 是永遠看不到的。
+   同理 th/td 的 padding 與底線也不該加到行號欄上。 */
+table:not(.lntable) {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
@@ -182,27 +370,20 @@ table {
   box-shadow: var(--custom-shadow-sm);
 }
 
-th, td {
+th,
+td:not(.lntd) {
   padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--custom-border-color);
 }
 
 th {
-  background: var(--custom-bg-subtle);
+  background: var(--custom-bg-raised);
   font-weight: 600;
 }
 
 tr:hover td {
-  background: var(--custom-bg-subtle);
-}
-
-body.colorscheme-dark th {
-  background: var(--custom-bg-card);
-}
-
-body.colorscheme-dark tr:hover td {
-  background: var(--custom-bg-card);
+  background: var(--custom-bg-raised);
 }
 
 /* ===== 文章插圖（figure shortcode）=====
@@ -218,7 +399,7 @@ figure img {
 }
 
 figure figcaption {
-  margin-top: 0.8rem;
+  margin-top: 0.6rem;
   font-size: 1.4rem;
   line-height: 1.7;
   text-align: center;
@@ -232,12 +413,23 @@ figure figcaption p {
 /* ===== 圖說（Hugo 內建 figure shortcode） =====
    主題沒有處理 <figure>，不加樣式的話圖說會跟內文混在一起。
    注意：1rem = 10px（見檔頭）。 */
-figure {
-  margin: 2.4rem 0;
+.post .post-content figure,
+.container.page article figure {
+  /* 主題有 `.content figure { margin: 0 }`，裸 figure 選擇器會被壓掉。
+     圖與圖之間要明顯大於「圖與它的圖說」之間，讀者才知道圖說屬於上面那張。 */
+  margin: 4rem 0;
   text-align: center;
 }
 
-figure img {
+/* 選擇器要夠強：下面的 `.post .post-content img` 有 max-width:100%，
+   specificity 比單純的 `figure img` 高，會把寬度限制蓋掉。 */
+.post .post-content figure img,
+.container.page article figure img {
+  /* 手機直拍的照片是 900x1600，不限高會佔滿整個畫面；
+     max-height 搭配 width:auto 才擋得住直式圖。（1rem = 10px，見檔頭） */
+  max-width: min(100%, 52rem);
+  max-height: 56vh;
+  width: auto;
   margin: 0 auto;
 }
 
@@ -250,6 +442,20 @@ figure figcaption {
 
 figure figcaption p {
   margin: 0;
+}
+
+/* 單位 logo：原圖是白底深字，深色模式下直接放會變成一塊突兀的白方塊。
+   當成刻意的「logo 牌」處理——縮小、留白、圓角，兩種配色下都成立。 */
+.post .post-content figure.logo img,
+.container.page article figure.logo img {
+  width: 22rem;
+  max-width: 100%;
+  max-height: none;
+  height: auto;
+  background: #fff;
+  padding: 1.2rem 1.8rem;
+  border-radius: 8px;
+  box-shadow: none;
 }
 
 /* ===== Images in content ===== */
@@ -294,6 +500,208 @@ figure figcaption p {
   gap: 0.5rem 1.25rem;
 }
 
+/* ===== 併排圖片（layouts/shortcodes/gallery.html）===== */
+.gallery {
+  display: grid;
+  /* 不指定 cols 時自動排；每格最小 20rem，窄螢幕會自然收成單欄 */
+  grid-template-columns: repeat(var(--gallery-cols, auto-fit), minmax(20rem, 1fr));
+  gap: 1.6rem;
+  margin: 4rem 0;
+}
+
+.post .post-content .gallery figure,
+.container.page article .gallery figure {
+  margin: 0;
+}
+
+.post .post-content .gallery figure img,
+.container.page article .gallery figure img {
+  /* 蓋掉單張圖的尺寸限制：格子裡要填滿寬度、統一比例 */
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: var(--gallery-ratio, 3 / 4);
+  object-fit: cover;
+}
+
+/* ===== 側邊章節導覽 rail（由 assets/js/custom.js 建立）=====
+   平常只有幾條短線靠在畫面左緣，滑過去才展開文字。
+   目前讀到的那一節用強調色標示 —— 這是橘色最有用的地方。
+   只在放得下的寬螢幕出現；窄螢幕沿用內文裡的目錄。 */
+.toc-rail {
+  display: none;
+}
+
+/* 門檻怎麼算的：內文欄 86rem 置中，rail 收合 6.7rem + 間距 2.4rem，
+   單側需要 9.1rem 邊距 → 86 + 9.1*2 ≈ 104rem。取 110rem 留餘裕。
+   原本設 1280px 太高：瀏覽器開側邊欄後視埠常只剩 1100 出頭，rail 就永遠不會出現。 */
+@media (min-width: 1100px) {
+  .toc-rail {
+    display: block;
+    position: fixed;
+    /* 以「內文欄」為基準定位，不是貼視窗左緣。
+       內文欄約 86rem 寬置中，所以左緣在 calc(50% - 43rem)；
+       再往左退 9rem 放 rail。max() 保證視窗很窄時不會跑到畫面外。 */
+    left: max(1.6rem, calc(50% - 52rem));
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 900;
+    padding: 1.2rem 1.4rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* 滑過整條 rail 才長出面板與文字 */
+  .toc-rail:hover,
+  .toc-rail:focus-within,
+  .toc-rail.is-open {
+    background: var(--custom-bg-card);
+    border-color: var(--custom-border-color);
+    box-shadow: var(--custom-shadow-md);
+  }
+
+  .toc-rail ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-rail li {
+    margin: 0;
+  }
+
+  .toc-rail a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.45rem 0;
+    text-decoration: none;
+    color: var(--custom-text-muted);
+  }
+
+  .toc-rail-dash {
+    flex: none;
+    width: 1.8rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--custom-text-muted);
+    opacity: 0.5;
+    transition: width 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  }
+
+  /* 子標題的線短一點，層級一眼看得出來 */
+  .toc-rail-h3 .toc-rail-dash,
+  .toc-rail-h4 .toc-rail-dash {
+    width: 1rem;
+    margin-left: 0.8rem;
+  }
+
+  .toc-rail-label {
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    opacity: 0;
+    transition: max-width 0.25s ease, opacity 0.2s ease;
+  }
+
+  .toc-rail:hover .toc-rail-label,
+  .toc-rail:focus-within .toc-rail-label,
+  .toc-rail.is-open .toc-rail-label {
+    max-width: 17rem;
+    opacity: 1;
+    text-overflow: ellipsis;
+  }
+
+  /* 目前讀到的那一節 */
+  .toc-rail a.active .toc-rail-dash {
+    width: 2.8rem;
+    background: var(--custom-primary);
+    opacity: 1;
+  }
+
+  .toc-rail-h3 a.active .toc-rail-dash,
+  .toc-rail-h4 a.active .toc-rail-dash {
+    width: 2rem;
+  }
+
+  .toc-rail a.active .toc-rail-label {
+    color: var(--custom-primary);
+  }
+
+  .toc-rail a:hover .toc-rail-dash {
+    background: var(--custom-primary);
+    opacity: 1;
+  }
+
+  .toc-rail a:hover .toc-rail-label {
+    color: var(--custom-primary);
+  }
+
+  /* 寬螢幕有 rail 之後，內文開頭那份長目錄就多餘了。
+     注意 .toc 是 .post-content 的「兄弟」（partial 放在它前面），
+     寫成 .post-content .toc 不會命中。 */
+  .post .toc,
+  .container.page article .toc {
+    display: none;
+  }
+}
+
+/* ===== 點圖放大 lightbox（由 assets/js/custom.js 建立）===== */
+.zoomable {
+  cursor: zoom-in;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  background: rgba(0, 0, 0, 0.92);
+}
+
+/* display:flex 會蓋掉 hidden 屬性，必須明確關掉 */
+.lightbox[hidden] {
+  display: none;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+  cursor: zoom-out;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 0;
+  font-size: 3rem;
+  line-height: 1;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}
+
 /* ===== Back-to-top button (injected by JS) ===== */
 .back-to-top {
   position: fixed;
@@ -302,19 +710,21 @@ figure figcaption p {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--custom-primary);
-  color: #fff;
-  border: none;
+  background: var(--custom-bg-card);
+  color: var(--custom-text-muted);
+  border: 1px solid var(--custom-border-color);
   font-size: 18px;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.3s, transform 0.3s, color 0.2s ease, border-color 0.2s ease;
   z-index: 1000;
   box-shadow: var(--custom-shadow-md);
 }
 
+/* 平時維持素色，只有滑過才出現橘 */
 .back-to-top:hover {
-  background: var(--custom-secondary);
+  color: var(--custom-primary);
+  border-color: var(--custom-primary);
   transform: translateY(-2px) !important;
 }
 
@@ -368,4 +778,410 @@ figure figcaption p {
   #TableOfContents {
     padding: 0.75rem 1rem;
   }
+}
+
+/* ===== 站名（左上角）=====
+   整站唯一「固定」出現的橘色。它每頁只出現一次，
+   不會像連結那樣一多就把點綴稀釋成主色。
+   選擇器要壓過主題的 body.colorscheme-dark .navigation a（0,2,1），
+   所以寫成 body .navigation a.navigation-title（0,2,2）。 */
+body .navigation a.navigation-title {
+  color: var(--custom-primary);
+}
+
+body .navigation a.navigation-title:hover,
+body .navigation a.navigation-title:focus {
+  color: var(--custom-primary);
+  opacity: 0.75;
+}
+
+/* ===== 標籤（tags）=====
+   主題用 inline-block ＋ `•` 排標籤，列距完全靠 line-height:1.5em，
+   手機上一換行兩列就黏在一起。改成 flex + gap：
+   gap 同時管欄距與列距，換幾列都一樣鬆。
+   `•` 一併隱藏 —— pill 本身有底色就分得開了，再加點只是雜訊。 */
+.content .post .post-meta .tags,
+.content .list .tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 0.7rem;
+}
+
+.content .post .post-meta .tags .separator,
+.content .list .tags .separator {
+  display: none;
+}
+
+/* 主題給 .post-meta 裡的 i 加了 margin-right:0.5rem，
+   跟 flex 的 gap 會疊加，這裡歸零交給 gap 統一管。 */
+.content .post .post-meta .tags > i,
+.content .list .tags > i {
+  margin-right: 0;
+}
+
+.content .post .post-meta .tags .tag,
+.content .list .tags .tag {
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;      /* 藥丸形，跟方角的程式碼區塊在視覺上分開 */
+  line-height: 1.5;
+  font-size: 1.4rem;
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+/* :hover 是 pseudo-class，算一個 class，
+   所以這條 (0,5,1) 才追得上主題深色的 .tag a (0,5,1)，同分靠載入順序勝出。 */
+.content .post .post-meta .tags .tag:hover,
+.content .list .tags .tag:hover {
+  border-color: var(--custom-primary);
+}
+
+.content .post .post-meta .tags .tag:hover a,
+.content .list .tags .tag:hover a {
+  color: var(--custom-primary);
+}
+
+/* ===== 外部連結圖示 =====
+   主題會在外部連結後面補一個 Font Awesome 的 ↗（_content.scss:28）。
+   那條規則只給了 padding-left:0.5em、右邊沒有留白，
+   所以中文句子裡會變成「連結 ↗給的學生邀請票」——圖示直接黏住下一個字。
+   連結本身已經用藍色標示了，這個圖示是多餘的，直接關掉。
+   （target="_blank" / rel="noopener" 由 render-link.html 給，不受影響。） */
+.content article a.external-link::after {
+  content: none;
+  padding-left: 0;
+}
+
+/* =============================================================================
+   字體堆疊（正體中文）
+   -----------------------------------------------------------------------------
+   主題原本的堆疊裡，CJK 的部分**一個正體中文字型都沒有**：
+     … Helvetica, "游ゴシック", "PingFang SC", STXihei, "华文细黑",
+       "Microsoft YaHei", "微软雅黑", SimSun, "宋体", …
+   全是日文（游ゴシック）與簡體中文。Windows 上這兩類都預裝，
+   所以整站的正體中文其實是被日文／簡體字型排出來的，
+   而字型各自的收字範圍又不一樣 —— 「啟」在 Yu Gothic 裡沒有
+   （日文用的是「啓」），就掉到 Microsoft YaHei，
+   結果同一個詞裡混了兩套字型，那個字看起來就特別怪。
+
+   修法：西文字型排前面（英數走拉丁字型，不會被中文字型的半形字接手），
+   CJK 段落改成正體優先 macOS → Windows → Linux。
+   實測這台機器 Microsoft JhengHei 與 Noto Sans TC 都已安裝。
+
+   另外 baseof.html 把 <html lang> 從 "zh" 改成 "zh-Hant"，
+   讓瀏覽器自己的 fallback 也優先挑正體字形（漢字統一碼的日／簡／繁字形差異）。
+   ============================================================================= */
+:root {
+  --font-sans:
+    /* 西文：Inter 自帶（見檔案最下方的 @font-face），後面幾個是它沒載到時的保底 */
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    /* 正體中文：macOS / Windows / Linux 各一 */
+    "PingFang TC", "Microsoft JhengHei", "微軟正黑體", "Noto Sans TC", "Noto Sans CJK TC",
+    /* 真的都沒有時的保底 */
+    sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* 程式碼：JetBrains Mono 自帶；中文註解不在它的 unicode-range 內，
+     會自動落到後面的中文字型，不會變成豆腐字。 */
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace,
+    "PingFang TC", "Microsoft JhengHei", "Noto Sans TC";
+}
+
+body,
+h1, h2, h3, h4, h5, h6,
+.list ul li .title,
+.navigation a, .navigation span,
+.pagination {
+  font-family: var(--font-sans);
+}
+
+/* =============================================================================
+   技術內容：圖表、數學式、程式碼
+   ============================================================================= */
+
+/* ----- 圖表（{{< d2 >}} 與 {{< mermaid >}} 共用外框） -----
+   關鍵是 .diagram-canvas 的 overflow-x:auto：
+   圖比版面寬時只有圖自己橫向捲動，不會把整頁撐出橫捲軸。
+   （手機上這是最常見的跑版來源。） */
+.post .post-content .diagram,
+.container.page article .diagram {
+  margin: 3.2rem 0;
+  padding: 0;
+}
+
+.post .post-content .diagram-canvas,
+.container.page article .diagram-canvas {
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* 捲動時兩側給一點內距，圖才不會貼著邊 */
+  padding: 0.4rem 0;
+  /* 捲動容器要能被鍵盤聚焦，否則只能用滑鼠捲 */
+  scrollbar-width: thin;
+}
+
+.post .post-content .diagram-canvas > svg,
+.container.page article .diagram-canvas > svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* D2 的 SVG 由 scripts/render-d2.mjs 補上原生 width/height，
+   shortcode 再把原生寬度寫進 --d2-w。
+
+   縮放通則（桌機手機同一條，不分裝置）：**可以縮小以容納版面，但最多縮到 80%**，
+   再寬就交給 .diagram-canvas 橫向捲動。
+   只用 max-width:100% 的話，1353px 的循序圖在 860px 的內文欄會被壓到 64%，
+   16px 的標籤變成 10px；在 320px 的手機上更只剩 24%，等於看不到。
+     小圖 373px／欄寬 860 → min(373, max(860,298)) = 373，原尺寸，不會被拉大
+     中圖 1000px／欄寬 860 → min(1000, max(860,800)) = 860，縮到 86%，不必捲
+     大圖 1353px／欄寬 860 → min(1353, max(860,1082)) = 1082，維持 80% 並捲動 */
+.post .post-content .diagram--d2 .diagram-canvas > svg,
+.container.page article .diagram--d2 .diagram-canvas > svg {
+  max-width: none;
+  width: min(var(--d2-w, 100%), max(100%, calc(var(--d2-w, 100%) * 0.8)));
+}
+
+/* 圖需要捲動時要看得出來，所以捲軸常駐而不是滑過才出現 */
+.post .post-content .diagram-canvas::-webkit-scrollbar,
+.container.page article .diagram-canvas::-webkit-scrollbar {
+  height: 6px;
+}
+.post .post-content .diagram-canvas::-webkit-scrollbar-thumb,
+.container.page article .diagram-canvas::-webkit-scrollbar-thumb {
+  background: var(--custom-border-color);
+  border-radius: 3px;
+}
+
+/* mermaid 在 JS 跑完前是一段原始碼文字，先藏起來避免閃一下語法 */
+.post .post-content .diagram--mermaid pre.mermaid,
+.container.page article .diagram--mermaid pre.mermaid {
+  visibility: hidden;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.post .post-content .diagram--mermaid pre.mermaid[data-processed],
+.container.page article .diagram--mermaid pre.mermaid[data-processed] {
+  visibility: visible;
+}
+
+/* ----- 數學式 -----
+   式子是建置期就渲染好的（見 config.toml 與 render-passthrough.html），
+   這裡只處理「排版溢出」——長式子在手機上會超出版面。 */
+.post .post-content .katex-display,
+.container.page article .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.6rem 0;
+  margin: 2.4rem 0;
+}
+
+/* KaTeX 預設 1.21em 在中文段落裡偏大，跟內文字級拉平一點比較耐看 */
+.post .post-content .katex,
+.container.page article .katex {
+  font-size: 1.1em;
+}
+
+/* 行內式子不要把行高撐開 */
+.post .post-content p .katex,
+.container.page article p .katex {
+  line-height: 1;
+}
+
+/* ----- 程式碼區塊 ----- */
+/* 主題沒有保證 pre 會橫向捲動；長行在手機上會撐破版面 */
+.post .post-content pre,
+.container.page article pre {
+  overflow-x: auto;
+  padding: 1.4rem 1.6rem;
+  line-height: 1.6;
+}
+
+/* 行號欄不要被選取／複製進去 */
+.post .post-content .chroma .lnt,
+.post .post-content .chroma .ln {
+  user-select: none;
+  opacity: 0.55;
+}
+
+/* 被標記的行：主題只給了淺黃底，在深色模式下幾乎看不出來。
+   改成用左側橘色標記，淺深兩色都成立，也不會蓋掉語法色。 */
+.post .post-content .chroma .hl {
+  background-color: color-mix(in srgb, var(--custom-primary) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--custom-primary);
+  display: block;
+}
+
+/* ----- 語法標示的對比修正 -----
+   量測主題 _syntax.scss 在白底上的對比，有兩個 token 低於 WCAG AA 的 4.5：
+     .c1 註解     #999988  →  2.89
+     .nb 內建名稱 #0086b3  →  4.15
+   註解在程式碼範例裡常常就是解說重點（「這兩行是問題所在」），
+   2.89 幾乎是灰掉的狀態，一定要修。
+
+   ⚠ 第一版寫成不分模式的 .chroma .nb，結果把深色也一起改了、掉到 2.66。
+     原因是我以為 _syntax_dark.scss 有覆寫 .nb —— 實測它沒有，
+     深色本來就是沿用淺色那個 #0086b3（在深底上剛好 4.56 過關）。
+     所以這裡必須明確只作用在「淺色情境」，而淺色情境有兩種：
+       1. 使用者手動切淺色 → body.colorscheme-light
+       2. 預設的 auto + 系統是淺色 → body.colorscheme-auto + media query
+     漏掉第 2 種的話，大多數訪客（auto 是預設值）根本吃不到這個修正。 */
+body.colorscheme-light .chroma .c,
+body.colorscheme-light .chroma .ch,
+body.colorscheme-light .chroma .cm,
+body.colorscheme-light .chroma .c1,
+body.colorscheme-light .chroma .cs { color: #5f6b76; }
+body.colorscheme-light .chroma .cp,
+body.colorscheme-light .chroma .cpf { color: #6b5f00; }
+body.colorscheme-light .chroma .nb,
+body.colorscheme-light .chroma .bp { color: #005f80; }
+
+@media (prefers-color-scheme: light) {
+  body.colorscheme-auto .chroma .c,
+  body.colorscheme-auto .chroma .ch,
+  body.colorscheme-auto .chroma .cm,
+  body.colorscheme-auto .chroma .c1,
+  body.colorscheme-auto .chroma .cs { color: #5f6b76; }
+  body.colorscheme-auto .chroma .cp,
+  body.colorscheme-auto .chroma .cpf { color: #6b5f00; }
+  body.colorscheme-auto .chroma .nb,
+  body.colorscheme-auto .chroma .bp { color: #005f80; }
+}
+
+/* ----- 帶行號的程式碼區塊 -----
+   Chroma 用 <table class="lntable"> 排行號，表格會依內容撐寬，
+   而 <td> 裡的 <pre> 自己不會捲 —— 於是超出版面的部分直接消失。
+   讓整個表格變成可捲動的區塊：行號會跟著捲走，但至少讀得到全部程式碼。
+   （想讓行號固定就得動 table-layout，在 <td> 裡限制寬度很脆弱，不值得。） */
+.post .post-content .chroma .lntable,
+.container.page article .chroma .lntable {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.post .post-content .chroma .lntd,
+.container.page article .chroma .lntd {
+  padding: 0;
+  border: 0;
+}
+
+/* 表格內的 pre 由外層負責捲動，自己不要再開一層 */
+.post .post-content .chroma .lntd > pre,
+.container.page article .chroma .lntd > pre {
+  overflow-x: visible;
+  box-shadow: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* =============================================================================
+   自帶西文字體
+   -----------------------------------------------------------------------------
+   Inter（內文與標題）與 JetBrains Mono（程式碼），兩者都是 OFL-1.1。
+   檔案在 static/fonts/，跟 KaTeX、mermaid 一樣不依賴任何 CDN。
+
+   中文刻意「不」自帶：Windows／macOS／Android 都內建了高品質正體字型
+   （微軟正黑體／蘋方／Noto Sans TC），自帶要付 8 MB 與首屏延遲，
+   換來的一致性有限。西文則相反 —— 系統預設的 Segoe UI／Helvetica
+   各平台差異明顯，換成 Inter 之後英數與標題在所有裝置上都一致。
+
+   unicode-range 讓瀏覽器只在頁面真的出現該範圍的字元時才下載：
+     latin      每頁都會載（23–24 KB × 3 字重）
+     latin-ext  只有出現波蘭文、土耳其文之類的重音字母才載，平常是 0
+   中文字元不在任何一個範圍內，所以會直接落到堆疊裡的下一個字型，
+   不會被 Inter 攔截。
+
+   font-display: swap —— 先用系統字型把文字畫出來，字體載完再換，
+   不會出現一段時間的空白文字。
+   ============================================================================= */
+
+/* --- Inter：latin --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* --- Inter：latin-ext（平常不會下載） --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext-600-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext-700-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* --- JetBrains Mono：程式碼 --- */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* 程式碼字型：JetBrains Mono 排第一，沒載到才落回系統等寬字型。
+   中文註解不在 unicode-range 內，會落到 --font-sans 的中文字型。 */
+.post .post-content pre,
+.post .post-content code,
+.container.page article pre,
+.container.page article code,
+pre, code, kbd, samp {
+  font-family: var(--font-mono);
 }
