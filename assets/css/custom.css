@@ -193,8 +193,11 @@ pre {
 /* 程式碼字型統一由 --font-mono 決定（定義在 :root，字體檔在檔案最下方）。
    原本這裡寫 'Fira Code'，但那支字型幾乎沒人裝，實際上一直是落回 Consolas。 */
 
-/* Inline code */
-p code, li code, td code {
+/* 行內程式碼。
+   ⚠ td 一定要排除 .lntd：開了行號之後，程式碼是包在
+   <td class="lntd"><pre><code> 裡的，`td code` 會命中整塊程式碼的 <code>，
+   在程式碼區塊裡面再畫一圈 1px 邊框 —— 就是那個看起來很怪的白色線框。 */
+p code, li code, td:not(.lntd) code {
   padding: 0.125rem 0.375rem;
   border-radius: 4px;
   font-size: 0.875em;
@@ -382,7 +385,9 @@ th {
   font-weight: 600;
 }
 
-tr:hover td {
+/* :not(.lntd) 很重要：Chroma 的行號表格也是 <table>，
+   沒排除的話滑鼠移到程式碼上，整塊會被當成表格列而「反白」。 */
+tr:hover td:not(.lntd) {
   background: var(--custom-bg-raised);
 }
 
@@ -1060,10 +1065,17 @@ body.colorscheme-light .chroma .bp { color: #005f80; }
    而 <td> 裡的 <pre> 自己不會捲 —— 於是超出版面的部分直接消失。
    讓整個表格變成可捲動的區塊：行號會跟著捲走，但至少讀得到全部程式碼。
    （想讓行號固定就得動 table-layout，在 <td> 裡限制寬度很脆弱，不值得。） */
+/* 捲動交給外層 div.chroma（見上面那條規則），表格本身維持 table 佈局。
+   之前把表格設成 display:block 來捲，代價是它會縮成內容寬度 ——
+   在 860px 的欄位裡只佔 544px，圓角盒子右半邊空一大塊。
+   維持 table + width:100% 才會滿版，內容更寬時由外層捲。 */
 .post .post-content .chroma .lntable,
 .container.page article .chroma .lntable {
-  display: block;
-  overflow-x: auto;
+  /* width 要是 100%（＝跟著容器），不能寫 max-content。
+     寫 max-content 的話這個元素本身就跟內容一樣寬，自己內部沒有溢出、
+     也就不會產生捲軸 —— 在 360px 的手機上量到它 544px 寬卻捲不動，
+     等於又回到「看得到一半、拉不到另一半」。
+     （桌機那 20px 的空隙不是這裡造成的，是 div.chroma 的內距，已另外歸零。） */
   width: 100%;
   margin: 0;
   border-radius: 0;
@@ -1184,4 +1196,134 @@ body.colorscheme-light .chroma .bp { color: #005f80; }
 .container.page article code,
 pre, code, kbd, samp {
   font-family: var(--font-mono);
+}
+
+/* ----- 程式碼區塊的外框 -----
+   Chroma 的 .chroma 底色會同時套到 div.chroma 與 pre.chroma。
+   開了行號之後結構是 div.highlight > div.chroma > table.lntable > td.lntd > pre ×2，
+   兩個 pre 各自帶圓角與陰影 —— 看起來就是兩塊分開的面板浮在一個大盒子裡。
+   把「盒子」交給 div.chroma，內層的 pre 一律透明無框，整塊才是一體的。 */
+.post .post-content .highlight,
+.container.page article .highlight {
+  position: relative;   /* 複製按鈕的定位基準，這一層不會捲動 */
+}
+
+/* ⚠ 這裡一定要寫 div.chroma，不能只寫 .chroma。
+   沒有行號時結構是 div.highlight > pre.chroma，
+   pre 也帶 .chroma，會一起被這條規則命中而被設成 overflow:hidden ——
+   結果長長的一行程式碼被裁掉且完全捲不動（實測 scrollWidth 1657 / clientWidth 860，
+   但 overflow-x 是 hidden，連捲軸都沒有）。 */
+.post .post-content .highlight > div.chroma,
+.container.page article .highlight > div.chroma {
+  border-radius: 8px;
+  box-shadow: var(--custom-shadow-md);
+  overflow-x: auto;     /* 捲動與圓角裁切都由這一層負責 */
+}
+
+.post .post-content .lntd > pre.chroma,
+.container.page article .lntd > pre.chroma {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* 行號欄與程式碼欄的內距分開給，數字才不會貼著左邊、程式碼也不會貼著行號。
+   ⚠ 這裡刻意不用 padding 簡寫：簡寫會連 padding-top 一起重設，
+   把下面「留給複製按鈕的頂端帶狀空間」蓋掉（而且這兩條的特異性更高，
+   不管寫在前面還後面都會贏）。實測手機上 padding-top 被打回 14px，
+   按鈕就又壓在第一行程式碼上了。 */
+.post .post-content .lntd:first-child > pre.chroma,
+.container.page article .lntd:first-child > pre.chroma {
+  padding-right: 0;
+  padding-bottom: 1.4rem;
+  padding-left: 1.4rem;
+}
+.post .post-content .lntd:last-child > pre.chroma,
+.container.page article .lntd:last-child > pre.chroma {
+  padding-right: 1.6rem;
+  padding-bottom: 1.4rem;
+  padding-left: 1.6rem;
+}
+
+/* 複製按鈕：疊在區塊右上角。因為掛在不捲動的 .highlight 上，
+   長程式碼橫向捲動時它會留在原位。 */
+.post .post-content .copy-code-button,
+.container.page article .copy-code-button {
+  z-index: 2;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.post .post-content .highlight:hover .copy-code-button,
+.post .post-content .copy-code-button:focus-visible,
+.container.page article .highlight:hover .copy-code-button,
+.container.page article .copy-code-button:focus-visible {
+  opacity: 1;
+}
+
+/* 程式碼區塊的橫向捲軸要看得見 —— 沒有捲軸的話，讀者不會知道右邊還有內容，
+   在觸控板／滑鼠上也很難察覺可以橫向拉。 */
+.post .post-content pre.chroma::-webkit-scrollbar,
+.post .post-content .lntable::-webkit-scrollbar,
+.container.page article pre.chroma::-webkit-scrollbar,
+.container.page article .lntable::-webkit-scrollbar {
+  height: 8px;
+}
+.post .post-content pre.chroma::-webkit-scrollbar-thumb,
+.post .post-content .lntable::-webkit-scrollbar-thumb,
+.container.page article pre.chroma::-webkit-scrollbar-thumb,
+.container.page article .lntable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+}
+.post .post-content pre.chroma,
+.post .post-content .lntable,
+.container.page article pre.chroma,
+.container.page article .lntable {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+/* mermaid 甘特圖的座標軸標籤是 d3-axis 畫的，不吃 gantt.fontSize，
+   量到只有 10px，跟 15px 的工作標籤、18px 的內文擺在一起明顯小一截。
+   這裡只放大字級、不動位置：刻度是照 x 座標擺的，放大後只要不互相重疊就安全。 */
+.post .post-content .diagram--mermaid svg .tick text,
+.container.page article .diagram--mermaid svg .tick text {
+  font-size: 13px;
+}
+
+/* 有行號時，主題給 div.chroma 的內距會讓裡面的表格比外框窄 20px，
+   看起來就是「圓角盒子裡再浮一個盒子」。內距交給裡層的 pre 負責，
+   外框這層歸零，整塊才貼齊成一體。 */
+.post .post-content .highlight > div.chroma,
+.container.page article .highlight > div.chroma {
+  padding: 0;
+}
+
+/* 複製按鈕原本直接疊在第一行程式碼上（長指令那種一行的區塊尤其明顯，
+   按鈕正好壓在指令中間）。在區塊頂端留一條帶狀空間專門給它，
+   程式碼從帶狀下方才開始，兩者就不會重疊。 */
+.post .post-content .highlight > pre.chroma,
+.container.page article .highlight > pre.chroma,
+.post .post-content .lntd > pre.chroma,
+.container.page article .lntd > pre.chroma {
+  padding-top: 3.8rem;
+}
+
+.post .post-content .copy-code-button,
+.container.page article .copy-code-button {
+  top: 0.9rem;
+  right: 1.2rem;
+}
+
+/* 行號欄縮到內容寬，程式碼欄吃掉剩下的寬度，整塊才會滿版 */
+.post .post-content .chroma .lntd:first-child,
+.container.page article .chroma .lntd:first-child {
+  width: 1%;
+  white-space: nowrap;
+}
+.post .post-content .chroma .lntd:last-child,
+.container.page article .chroma .lntd:last-child {
+  width: 99%;
 }

@@ -1,3 +1,11 @@
+{{- /*
+  蓋掉主題的 page.html，差別是多呼叫一次 toc.html，
+  讓「專案」「關於」這類頁面也有目錄（主題原本只有文章有）。
+
+  寬螢幕的側邊 rail 不在這裡 —— 它由 assets/js/custom.js 依標題自己建立。
+  那支腳本原本只認 .post-content（文章），所以走這個模板的頁面雖然標題一堆，
+  側邊卻什麼都沒有；選擇器已補上 .container.page article。
+*/ -}}
 <section class="container page">
   <article>
     <header>

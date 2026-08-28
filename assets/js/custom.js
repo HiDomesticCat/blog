@@ -40,21 +40,35 @@
       }
     });
 
-    // ===== Code copy buttons =====
+    // ===== 程式碼複製按鈕 =====
+    // 按鈕掛在 div.highlight（不會捲動的外層），不是掛在 <pre> 上。
+    // 掛在 <pre> 的話它會跟著程式碼一起橫向捲走 —— 長指令捲到一半，
+    // 按鈕就跑到句子中間去了。
+    //
+    // 另外開了行號之後，Chroma 的結構是
+    //   div.highlight > div.chroma > table.lntable > tr > td.lntd > pre  ×2
+    // 左邊那個 pre 裝行號、右邊裝程式碼。舊寫法對「每個 pre」都加按鈕，
+    // 所以一個區塊會冒出兩顆，其中一顆還蓋住第 1 行的行號。
     var isZh = document.documentElement.lang === 'zh' ||
+               document.documentElement.lang === 'zh-Hant' ||
                window.location.pathname.indexOf('/zh/') !== -1;
-    var copyLabel = isZh ? '\u8907\u88FD' : 'Copy';
-    var copiedLabel = isZh ? '\u5DF2\u8907\u88FD' : 'Copied!';
+    var copyLabel = isZh ? '複製' : 'Copy';
+    var copiedLabel = isZh ? '已複製' : 'Copied!';
 
-    document.querySelectorAll('pre').forEach(function (block) {
-      var code = block.querySelector('code');
+    document.querySelectorAll('.post-content .highlight, .container.page article .highlight').forEach(function (block) {
+      // 有行號時取右欄（程式碼），沒有行號時就是唯一那個 pre。
+      // 取錯的話複製出來會夾帶一整排行號。
+      var code = block.querySelector('.lntd:last-child code') || block.querySelector('code');
       if (!code) return;
+      if (block.querySelector('.copy-code-button')) return;
 
       block.style.position = 'relative';
 
       var copyBtn = document.createElement('button');
       copyBtn.className = 'copy-code-button';
+      copyBtn.type = 'button';
       copyBtn.textContent = copyLabel;
+      copyBtn.setAttribute('aria-label', isZh ? '複製程式碼' : 'Copy code');
       block.appendChild(copyBtn);
 
       copyBtn.addEventListener('click', function () {
@@ -62,7 +76,6 @@
           copyBtn.textContent = copiedLabel;
           setTimeout(function () { copyBtn.textContent = copyLabel; }, 2000);
         }).catch(function () {
-          // Fallback: select text
           var range = document.createRange();
           range.selectNodeContents(code);
           var sel = window.getSelection();
@@ -165,7 +178,13 @@
     // 平常只顯示幾條短線靠在畫面左緣，滑過去才展開文字標籤。
     // 目前讀到的那一節會標成強調色。寬螢幕才出現，窄螢幕沿用內文裡的目錄。
     var tocLinks = document.querySelectorAll('#TableOfContents a');
-    var headings = document.querySelectorAll('.post-content h2[id], .post-content h3[id], .post-content h4[id]');
+    // 兩種容器都要收：文章是 .post-content，
+    // 「專案」「關於」這類頁面走的是主題的 page.html，容器是 .container.page article。
+    // 只寫前者的話，那些頁面雖然標題一堆卻完全沒有側邊導覽。
+    var headings = document.querySelectorAll(
+      '.post-content h2[id], .post-content h3[id], .post-content h4[id],' +
+      '.container.page article h2[id], .container.page article h3[id], .container.page article h4[id]'
+    );
     var railLinks = [];
 
     if (headings.length >= 3) {
