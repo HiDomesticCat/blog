@@ -205,6 +205,53 @@ body.colorscheme-dark tr:hover td {
   background: var(--custom-bg-card);
 }
 
+/* ===== 文章插圖（figure shortcode）=====
+   主題沒有處理 figure/figcaption，照片說明會跟內文混在一起。
+   注意 1rem = 10px（見檔頭）。 */
+figure {
+  margin: 2.4rem 0;
+}
+
+figure img {
+  display: block;
+  margin: 0 auto;
+}
+
+figure figcaption {
+  margin-top: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.7;
+  text-align: center;
+  color: var(--custom-text-muted);
+}
+
+figure figcaption p {
+  margin: 0;
+}
+
+/* ===== 圖說（Hugo 內建 figure shortcode） =====
+   主題沒有處理 <figure>，不加樣式的話圖說會跟內文混在一起。
+   注意：1rem = 10px（見檔頭）。 */
+figure {
+  margin: 2.4rem 0;
+  text-align: center;
+}
+
+figure img {
+  margin: 0 auto;
+}
+
+figure figcaption {
+  margin-top: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.7;
+  color: var(--custom-text-muted);
+}
+
+figure figcaption p {
+  margin: 0;
+}
+
 /* ===== Images in content ===== */
 .container.page article img,
 .post .post-content img {
