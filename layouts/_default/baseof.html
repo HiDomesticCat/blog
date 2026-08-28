@@ -170,6 +170,19 @@
 
         if (n.querySelector('text.taskTextOutsideRight, text.taskTextOutsideLeft')) fix.widen = true;
 
+        // 軸上的日期也會擠在一起。圖窄的時候刻度數量不變，
+        // 標籤就直接疊起來（實測 500px 寬塞 16 個日期，重疊 15 處、最小間距 -15px）。
+        // 這種擠壓不會讓任何標籤「跑出框」，所以上面那條檢查抓不到，要另外看。
+        var tickBoxes = [];
+        n.querySelectorAll('.tick text').forEach(function (t) {
+          var r = t.getBoundingClientRect();
+          if (r.width) tickBoxes.push(r);
+        });
+        tickBoxes.sort(function (a, b) { return a.left - b.left; });
+        for (var i = 1; i < tickBoxes.length; i++) {
+          if (tickBoxes[i].left - tickBoxes[i - 1].right < 2) { fix.widen = true; break; }
+        }
+
         // today 標記：今天落在圖表日期範圍之外時，mermaid 仍然把線畫出來，
         // 位置會跑到左側的區段標籤區裡，看起來就是一條線把標題切開
         // （實測 today 線 x=269、「Implementation」右緣 272，切了 3px）。
@@ -202,10 +215,37 @@
         return fix;
       }
 
+      // mermaid 的 useMaxWidth 會把圖等比縮到容器寬度。在桌機上沒問題，
+      // 但 320px 的手機容器配上 960px 的圖，等於整張縮成三分之一 ——
+      // 實測「文獻回顧」四個字只剩 19px 寬，每字不到 5px，完全看不清。
+      // 比例關係沒變，所以「標籤有沒有跑出框」那類檢查全部會通過，
+      // 但實際上已經失真。寧可讓圖維持原尺寸、由 .diagram-canvas 橫向捲動。
+      function unshrink(n) {
+        var svg = n.querySelector('svg');
+        if (!svg) return;
+        var vb = svg.viewBox && svg.viewBox.baseVal;
+        if (!vb || !vb.width) return;
+        var box = n.closest('.diagram-canvas') || n.parentElement;
+        if (!box) return;
+        if (box.clientWidth < vb.width) {
+          svg.style.minWidth = vb.width + 'px';
+          svg.style.maxWidth = 'none';
+        } else {
+          svg.style.minWidth = '';
+          svg.style.maxWidth = '';
+        }
+      }
+
+      function unshrinkAll() {
+        [].slice.call(document.querySelectorAll('.mermaid')).forEach(unshrink);
+      }
+
       function refineLayout(dark, nodes) {
+        // 手機上起始寬度只有 320，要多幾輪才追得上；每輪 ×1.25，
+        // 5 輪可以從 320 走到約 977，足以讓 16 個日期排得開。
         var pass = 0;
         var step = function () {
-          if (pass >= 3) return;
+          if (pass >= 5) { unshrinkAll(); return; }
           var todo = [];
           nodes.forEach(function (n) {
             var fix = measureFixes(n);
@@ -219,7 +259,7 @@
             }
             if (changed) todo.push(n);
           });
-          if (!todo.length) return;
+          if (!todo.length) { unshrinkAll(); return; }
           pass++;
           // mermaid 的設定是全域的，不是每張圖各自帶設定，
           // 所以每張圖都要「先設定再渲染」，只能串成序列。
@@ -247,13 +287,33 @@
         nodes.forEach(function (n) { n.__ganttWidth = 0; n.__leftPad = 0; resetNode(n); });
         configure(dark, null);
         var done = window.mermaid.run({ nodes: nodes });
-        if (done && done.then) done.then(function () { refineLayout(dark, nodes); });
+        if (done && done.then) done.then(function () { unshrinkAll(); refineLayout(dark, nodes); });
       }
       window.__initMermaid = draw;
       // 主題切換是改 body 的 class，用 MutationObserver 接；
       // colorscheme-auto 時還要跟著系統設定變動。
       new MutationObserver(draw).observe(document.body, { attributes: true, attributeFilter: ['class'] });
       matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+      // 轉向或改變視窗大小時重新判斷要不要維持原尺寸。
+      // 只調整樣式、不重新渲染，所以很便宜。
+      // 視窗大小改變（例如手機轉向）時：
+      //   小幅變動只重新判斷要不要維持原尺寸，不重畫 —— 便宜。
+      //   幅度大到容器寬度變了一截，才整個重畫 —— 否則圖會停在
+      //   上一個尺寸算出來的寬度（實測從手機拉到桌機後，圖仍是 976px
+      //   而容器已經 960px，白白多出一段橫向捲動）。
+      var rt, lastW = window.innerWidth;
+      window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+          if (Math.abs(window.innerWidth - lastW) > 80) {
+            lastW = window.innerWidth;
+            last = null;   // 讓 draw() 不要因為深淺色沒變就跳過
+            draw();
+          } else {
+            unshrinkAll();
+          }
+        }, 250);
+      });
     })();
   </script>
   <script src="{{ "js/mermaid-11.6.0.min.js" | relURL }}" defer
