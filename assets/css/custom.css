@@ -1678,3 +1678,56 @@ pre, code, kbd, samp {
     --breakout: 120rem;
   }
 }
+
+/* 更寬的視窗（把瀏覽器縮小、或大螢幕）再放寬撐開上限。
+   這個站最寬的圖是 1493px 的循序圖，所以上限做到 152rem 之後
+   所有圖都能完整放進版面、完全不必橫向捲。
+   再寬就沒有意義了 —— 容器變寬不會讓圖本身變大，只是兩側空白更多。 */
+@media (min-width: 1800px) {
+  .post .post-content > .diagram,
+  .post .post-content > .highlight,
+  .post .post-content > .zoom-host {
+    --breakout: 136rem;
+  }
+}
+
+@media (min-width: 2100px) {
+  .post .post-content > .diagram,
+  .post .post-content > .highlight,
+  .post .post-content > .zoom-host {
+    --breakout: 152rem;
+  }
+}
+
+/* =============================================================================
+   大螢幕的整體放大
+   -----------------------------------------------------------------------------
+   主題把容器寫成 max-width: 90rem，而 html 是 font-size: 62.5%（1rem = 10px），
+   幾乎所有尺寸都是 rem/em —— 所以只要調根字級，文字、欄寬、間距、標題會
+   等比例一起放大，不是只有字變大而版面沒跟上。
+
+   媒體查詢的斷點用 px，不受根字級影響，所以不會產生循環。
+
+   ⚠ D2 的圖是固定像素（SVG 的 width 屬性），不會跟著 rem 縮放。
+     不一起處理的話，內文放大到 21.6px 而圖的標籤還是 18px，
+     先前好不容易對齊的字級又會脫鉤。--ui-scale 就是給圖用的同一個倍率。
+   ============================================================================= */
+:root {
+  --ui-scale: 1;
+}
+
+@media (min-width: 1600px) {
+  html { font-size: 68.75%; }   /* 1rem = 11px，內文 19.8px */
+  :root { --ui-scale: 1.1; }
+}
+
+@media (min-width: 2000px) {
+  html { font-size: 75%; }      /* 1rem = 12px，內文 21.6px */
+  :root { --ui-scale: 1.2; }
+}
+
+/* 圖跟著同一個倍率放大，字級才會繼續跟內文一致 */
+.post .post-content .diagram--d2 .diagram-canvas > svg,
+.container.page article .diagram--d2 .diagram-canvas > svg {
+  width: calc(var(--d2-w, 100%) * var(--ui-scale));
+}
