@@ -233,6 +233,23 @@
     }
 
     if ((tocLinks.length || railLinks.length) && headings.length) {
+      var railEl = document.querySelector('.toc-rail');
+
+      // rail 有最大高度、會自己捲。標題一多，目前所在的那一項就可能捲到
+      // 可視範圍外 —— 讀者看到的是一整排短線但橘色標記不知道在哪。
+      // 這裡在高亮換位置時把它帶回視野內。
+      // 刻意不用 scrollIntoView：它會連同所有可捲祖先一起捲，
+      // 有機會把整個頁面也拉走；直接算 scrollTop 只動 rail 自己。
+      var keepActiveVisible = function (link) {
+        if (!railEl || railEl.scrollHeight <= railEl.clientHeight) return;
+        var r = railEl.getBoundingClientRect();
+        var b = link.getBoundingClientRect();
+        var pad = 12;
+        if (b.top < r.top + pad) railEl.scrollTop -= (r.top + pad - b.top);
+        else if (b.bottom > r.bottom - pad) railEl.scrollTop += (b.bottom - (r.bottom - pad));
+      };
+
+      var lastCurrent = null;
       var syncActive = function () {
         var current = '';
         Array.prototype.forEach.call(headings, function (h) {
@@ -246,6 +263,14 @@
         };
         Array.prototype.forEach.call(tocLinks, mark);
         railLinks.forEach(mark);
+
+        // 只有在「換了一節」時才動 rail 的捲動位置，
+        // 否則使用者手動捲 rail 去看別段時會被每次 scroll 事件拉回來。
+        if (current !== lastCurrent) {
+          lastCurrent = current;
+          var active = railLinks.filter(function (a) { return a.classList.contains('active'); })[0];
+          if (active) keepActiveVisible(active);
+        }
       };
       window.addEventListener('scroll', syncActive, { passive: true });
       syncActive();
@@ -381,6 +406,9 @@
         var dragging = false, sx = 0, sy = 0, sl = 0, st = 0;
         scroller.addEventListener('pointerdown', function (e) {
           if (e.button !== 0 || e.target.closest('a, button')) return;
+          // 在文字上按下 → 讓瀏覽器做選取，不要攔成平移。
+          // 圖的空白處、背景才用來拖曳平移；內容太大時也還有滾輪與捲軸。
+          if (e.target.closest('text, tspan, foreignObject, code, pre, td, th, .katex')) return;
           dragging = true; dragMoved = false;
           sx = e.clientX; sy = e.clientY;
           sl = scroller.scrollLeft; st = scroller.scrollTop;
@@ -502,32 +530,56 @@
         btn.className = 'zoom-button';
         btn.setAttribute('aria-label', T.open);
         btn.title = T.open;
-        btn.textContent = '⤢';
+        // 用 SVG 而不是文字符號：⤢ 在不同平台的字型裡大小與基線差很多，
+        // 常常變成一個歪掉的箭頭。自己畫的四角展開圖示每台機器都一樣。
+        btn.innerHTML = '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" ' +
+          'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M6 1.8H1.8V6M10 1.8h4.2V6M6 14.2H1.8V10M10 14.2h4.2V10"/></svg>';
         btn.addEventListener('click', function (e) {
           e.preventDefault(); e.stopPropagation();
           open(entry);
         });
 
-        if (entry.kind === 'table') {
-          // 表格沒有自己的定位容器，包一層再放按鈕
-          var wrap = document.createElement('div');
-          wrap.className = 'table-wrap has-zoom';
-          entry.el.parentNode.insertBefore(wrap, entry.el);
-          wrap.appendChild(entry.el);
-          wrap.appendChild(btn);
-          entry.el = wrap;          // 放大時連同外框一起搬，位置才好還原
+        // ⚠ 按鈕不能掛在會捲動的元素上。
+        // .diagram-canvas / .katex-display / 表格外框自己就是 overflow-x:auto 的捲動容器，
+        // 絕對定位的子元素會跟著內容一起捲走 —— 橫向拉圖時按鈕就飄到圖中間去了。
+        // 所以一律再包一層不捲動的 .zoom-host 來放按鈕。
+        // .highlight 本身不捲（捲的是它裡面的 pre / table），可以直接掛。
+        var host;
+        if (entry.kind === 'code') {
+          host = entry.el;
+          host.classList.add('has-zoom');
         } else {
-          entry.el.classList.add('has-zoom');
-          entry.el.appendChild(btn);
+          host = document.createElement('div');
+          host.className = 'zoom-host has-zoom';
+          entry.el.parentNode.insertBefore(host, entry.el);
+          host.appendChild(entry.el);
+        }
+        host.appendChild(btn);
+
+        // 表格本身沒有捲動容器，補一層
+        if (entry.kind === 'table') {
+          var scrollWrap = document.createElement('div');
+          scrollWrap.className = 'table-scroll';
+          entry.el.parentNode.insertBefore(scrollWrap, entry.el);
+          scrollWrap.appendChild(entry.el);
+          entry.el = scrollWrap;   // 放大時搬捲動容器，位置才好還原
         }
 
-        // 圖沒有選字需求，點整塊都可以放大；程式碼與表格只認按鈕
+        // 圖可以點整塊放大；程式碼與表格只認按鈕（那裡點擊要留給選字）。
+        // 但圖裡的文字也要能選 —— 所以「按下到放開有明顯位移」或
+        // 「這次操作產生了選取範圍」都不算點擊，不開啟放大。
         if (entry.kind === 'diagram') {
           entry.el.classList.add('is-clickable');
+          var px = 0, py = 0;
+          entry.el.addEventListener('pointerdown', function (e) { px = e.clientX; py = e.clientY; });
           entry.el.addEventListener('click', function (e) {
-            if (isOpen) return;                       // 覆蓋層開著就不再觸發
+            if (isOpen) return;
             if (this.closest('.zoomview')) return;
             if (e.target.closest('a, button')) return;
+            if (Math.abs(e.clientX - px) > 3 || Math.abs(e.clientY - py) > 3) return;
+            var sel = window.getSelection();
+            if (sel && !sel.isCollapsed && sel.toString().trim()) return;
             open(entry);
           });
         }
