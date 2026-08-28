@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Writing on hicat0x0</title><link>https://blog.hicat0x0.uk/en/tags/writing/</link><description>Recent content in Writing on hicat0x0</description><generator>Hugo</generator><language>en</language><lastBuildDate>Fri, 28 Aug 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.hicat0x0.uk/en/tags/writing/index.xml" rel="self" type="application/rss+xml"/><item><title>Technical Writing Components</title><link>https://blog.hicat0x0.uk/en/posts/tech-rendering-demo/</link><pubDate>Fri, 28 Aug 2026 00:00:00 +0000</pubDate><guid>https://blog.hicat0x0.uk/en/posts/tech-rendering-demo/</guid><description>&lt;p>Every component available for technical posts on this site, along with the
+limits I have actually run into&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>. Everything below is really rendered rather
+than screenshotted — diagrams enlarge from the button in their corner, code
+copies, and all of the text selects. I come back to this page when writing.&lt;/p>
+&lt;h2 id="mathematics">
+ Mathematics
+ &lt;a class="heading-link" href="#mathematics">
+ &lt;i class="fa-solid fa-link" aria-hidden="true" title="Link to heading">&lt;/i>
+ &lt;span class="sr-only">Link to heading&lt;/span>
+ &lt;/a>
+&lt;/h2>
+&lt;p>Rendered &lt;strong>at build time&lt;/strong> with KaTeX. No JavaScript is needed in the browser,
+and no &lt;code>math = true&lt;/code> in front matter.&lt;/p></description></item></channel></rss>
