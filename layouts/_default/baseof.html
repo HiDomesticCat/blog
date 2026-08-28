@@ -121,6 +121,65 @@
         return matchMedia('(prefers-color-scheme: dark)').matches;
       }
 
+      function ganttOpts(extraWidth) {
+        var g = { fontSize: 14, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 };
+        if (extraWidth) { g.useWidth = extraWidth; g.useMaxWidth = false; }
+        return g;
+      }
+
+      function configure(dark, extraWidth) {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: 'base',
+          themeVariables: dark ? DARK : LIGHT,
+          securityLevel: 'strict',
+          fontFamily: getComputedStyle(document.body).fontFamily,
+          // 甘特圖的字級不吃 themeVariables.fontSize，要在這裡另外給。
+          gantt: ganttOpts(extraWidth)
+        });
+      }
+
+      function resetNode(n) {
+        // mermaid 會把元素內容換成 SVG，所以第一次先把原始碼留起來，
+        // 之後每次重繪都從留存的原始碼開始，否則第二次會拿 SVG 當輸入。
+        if (!srcs.has(n)) srcs.set(n, n.textContent);
+        n.textContent = srcs.get(n);
+        n.removeAttribute('data-processed');
+      }
+
+      function hasOutsideLabel(n) {
+        return !!n.querySelector('text.taskTextOutsideRight, text.taskTextOutsideLeft');
+      }
+
+      // 甘特圖的工作條寬度 = 工期 ÷ 圖表總寬，所以欄位一窄，
+      // 稍長的標籤就塞不進條裡，mermaid 會把它丟到條外的格線上 —— 看起來就是跑版。
+      // 這不是字級問題（實測 860px 時「Environment setup」124px 塞在 125px 的條裡，
+      // 只剩 1px 餘裕，欄位再窄一點就爆），所以改成：偵測到有標籤被丟出去，
+      // 就把圖加寬重畫，直到塞得下。加寬後的圖比內文欄寬，交給既有的橫向捲動與放大檢視。
+      function widenUntilLabelsFit(dark, nodes) {
+        var pass = 0;
+        var step = function () {
+          var bad = nodes.filter(hasOutsideLabel);
+          if (!bad.length || pass >= 3) return;
+          pass++;
+          bad.forEach(function (n) {
+            var w = n.__ganttWidth || Math.round(n.getBoundingClientRect().width) || 860;
+            n.__ganttWidth = Math.round(w * 1.25);
+            resetNode(n);
+          });
+          // 每個節點的寬度可能不同，只能逐一設定後再渲染
+          var chain = Promise.resolve();
+          bad.forEach(function (n) {
+            chain = chain.then(function () {
+              configure(dark, n.__ganttWidth);
+              return window.mermaid.run({ nodes: [n] });
+            });
+          });
+          chain.then(step);
+        };
+        step();
+      }
+
       var last = null;
       function draw() {
         if (!window.mermaid) return;
@@ -129,26 +188,10 @@
         var dark = isDark();
         if (dark === last) return;
         last = dark;
-        nodes.forEach(function (n) {
-          // mermaid 會把元素內容換成 SVG，所以第一次先把原始碼留起來；
-          // 之後每次重繪都從留存的原始碼開始，否則第二次會拿 SVG 當輸入。
-          if (!srcs.has(n)) srcs.set(n, n.textContent);
-          n.textContent = srcs.get(n);
-          n.removeAttribute('data-processed');
-        });
-        window.mermaid.initialize({
-          startOnLoad: false,
-          theme: 'base',
-          themeVariables: dark ? DARK : LIGHT,
-            securityLevel: 'strict',
-          fontFamily: getComputedStyle(document.body).fontFamily,
-          // 甘特圖的字級不吃 themeVariables.fontSize，要在這裡另外給。
-          // 甘特圖的字級受工作條寬度限制：15px 時「Environment setup」量到 132px，
-          // 但那條只有 125px 寬，字會滿出條外（看起來就是跑版）。14px 才塞得下。
-          // 這是甘特圖本身的密度限制，不是設定沒生效。
-          gantt: { fontSize: 14, sectionFontSize: 15, barHeight: 24, barGap: 6, gridLineStartPadding: 40 }
-        });
-        window.mermaid.run({ nodes: nodes });
+        nodes.forEach(function (n) { n.__ganttWidth = 0; resetNode(n); });
+        configure(dark, 0);
+        var done = window.mermaid.run({ nodes: nodes });
+        if (done && done.then) done.then(function () { widenUntilLabelsFit(dark, nodes); });
       }
       window.__initMermaid = draw;
       // 主題切換是改 body 的 class，用 MutationObserver 接；
