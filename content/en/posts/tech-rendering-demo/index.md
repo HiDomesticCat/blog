@@ -2,15 +2,15 @@
 title = "Technical Writing Components"
 slug = "tech-rendering-demo"
 date = 2026-08-28
-draft = true
 description = "Every component available for technical posts here, and the things that do not work."
 categories = ["Notes"]
 tags = ["writing", "tooling"]
 +++
 
-A reference page listing every component I can use in a technical post, and the
-limits I have actually run into[^1]. Everything below is really rendered.
-It is `draft = true`, so it never gets published.
+Every component available for technical posts on this site, along with the
+limits I have actually run into[^1]. Everything below is really rendered rather
+than screenshotted — diagrams enlarge from the button in their corner, code
+copies, and all of the text selects. I come back to this page when writing.
 
 ## Mathematics
 

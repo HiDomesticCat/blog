@@ -508,8 +508,9 @@ figure figcaption p {
 /* ===== 併排圖片（layouts/shortcodes/gallery.html）===== */
 .gallery {
   display: grid;
-  /* 不指定 cols 時自動排；每格最小 20rem，窄螢幕會自然收成單欄 */
-  grid-template-columns: repeat(var(--gallery-cols, auto-fit), minmax(20rem, 1fr));
+  /* 不指定 cols 時用 auto-fit 自動排，每格最小 20rem，窄螢幕自然收成單欄。
+     有指定 cols 時 shortcode 會把 --gallery-min 設成 0，欄位才收得下去。 */
+  grid-template-columns: repeat(var(--gallery-cols, auto-fit), minmax(var(--gallery-min, 20rem), 1fr));
   gap: 1.6rem;
   margin: 4rem 0;
 }
@@ -1730,4 +1731,15 @@ pre, code, kbd, samp {
 .post .post-content .diagram--d2 .diagram-canvas > svg,
 .container.page article .diagram--d2 .diagram-canvas > svg {
   width: calc(var(--d2-w, 100%) * var(--ui-scale));
+}
+
+/* 手機一律單欄，即使文章寫了 cols="2"。
+   兩張照片並排在 320px 上每張只剩 152px，細節根本看不到；
+   全寬單欄好看得多，而且左右邊距會跟其他圖一致
+   （並排時右邊那張會貼著版面右緣，跟左邊那張看起來不對稱）。 */
+@media (max-width: 600px) {
+  .post .post-content .gallery,
+  .container.page article .gallery {
+    grid-template-columns: 1fr;
+  }
 }

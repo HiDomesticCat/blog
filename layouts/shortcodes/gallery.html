@@ -14,7 +14,11 @@
   格子裡的圖會裁切成一致比例好排版，但點開 lightbox 看到的仍是完整原圖。
 */}}
 {{- $style := "" -}}
-{{- with .Get "cols" }}{{ $style = printf "%s--gallery-cols:%s;" $style . }}{{ end -}}
+{{- /* 有指定欄數時，把每格的最小寬度設成 0。
+       預設的 minmax(20rem, 1fr) 是給 auto-fit 用的（它需要一個最小值才知道
+       一列塞得下幾格），但一旦欄數被寫死，那個 20rem 就變成「每格至少 200px」——
+       cols="2" 在 320px 的手機上會算出 200px+200px+間距=416px，直接撐破版面。 */ -}}
+{{- with .Get "cols" }}{{ $style = printf "%s--gallery-cols:%s;--gallery-min:0;" $style . }}{{ end -}}
 {{- with .Get "ratio" }}{{ $style = printf "%s--gallery-ratio:%s;" $style . }}{{ end -}}
 <div class="gallery"{{ with $style }} style="{{ . | safeCSS }}"{{ end }}>
 {{ .Inner }}
